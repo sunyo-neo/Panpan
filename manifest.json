@@ -1,0 +1,32 @@
+{
+"manifest_version": 3,
+"name": "Panel Zoom",
+"version": "1.0",
+"description": "Guided panel view for long-strip manga readers.",
+"action": {
+"default_popup": "popup.html"
+},
+"permissions": [
+"activeTab",
+"scripting"
+],
+"host_permissions": [
+"https://kagane.to/",
+"https://.kagane.to/"
+],
+"content_scripts": [
+{
+"matches": [
+"https://kagane.to/",
+"https://.kagane.to/"
+],
+"js": ["content.js"]
+}
+],
+"browser_specific_settings": {
+"gecko": {
+"id": "panelzoom@yourdomain.com",
+"strict_min_version": "109.0"
+}
+}
+}
