@@ -113,12 +113,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         settingsPreview.textContent = `${dir} • ${pad}% Pad • ${adj}`;
         
         debugContent.style.display = debugCheck.checked ? 'block' : 'none';
-        
-        // Dynamic accordion height adjustment to prevent clipping
-        const advContent = document.getElementById('adv-settings-content');
-        if (advContent && advContent.classList.contains('expanded')) {
-            advContent.style.maxHeight = advContent.scrollHeight + 'px';
-        }
     };
 
     initCustomToggle(adjCheck, updatePreviews);
@@ -138,11 +132,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const isExpanded = advContent.classList.contains('expanded');
             if (isExpanded) {
                 advContent.classList.remove('expanded');
-                advContent.style.maxHeight = '0px';
                 advChevron.classList.remove('expanded');
             } else {
                 advContent.classList.add('expanded');
-                advContent.style.maxHeight = advContent.scrollHeight + 'px';
                 advChevron.classList.add('expanded');
             }
         });

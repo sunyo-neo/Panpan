@@ -98,11 +98,14 @@
         /* View State Management */
         .view-container {
             position: relative;
+            display: grid;
+            grid-template-columns: 1fr;
+            grid-template-rows: auto;
             overflow: hidden;
             width: 100%;
-            height: auto;
         }
         .view {
+            grid-area: 1 / 1;
             display: none;
             width: 100%;
             box-sizing: border-box;
@@ -112,11 +115,15 @@
         }
         .view.anim-enter {
             display: block;
-            animation: slideIn 0.25s forwards var(--transition-normal);
+            animation: slideIn 0.25s forwards;
         }
         .view.anim-exit {
             display: block;
-            animation: slideOut 0.25s forwards var(--transition-normal);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            animation: slideOut 0.25s forwards;
         }
         @keyframes slideIn {
             from { opacity: 0; transform: translateX(15px); }
@@ -408,9 +415,19 @@
             transform: rotate(180deg);
         }
         .accordion-content {
-            max-height: 0;
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.3s cubic-bezier(0.33, 1, 0.68, 1);
             overflow: hidden;
-            transition: max-height 0.3s ease-out;
+            will-change: grid-template-rows;
+        }
+        .accordion-content.expanded {
+            grid-template-rows: 1fr;
+        }
+        .accordion-inner {
+            min-height: 0;
+            overflow: hidden;
+            padding-top: var(--space-4);
         }
     </style>
 </head>
@@ -480,20 +497,22 @@
                 </svg>
             </div>
             <div class="accordion-content" id="adv-settings-content">
-                <div class="control-group" style="margin-top: 16px;">
-                    <div class="setting-row" style="background: var(--bg-surface); padding: 12px; border-radius: var(--radius-md); border: var(--glass-border);">
-                        <div class="setting-label-block">
-                            <strong style="color: var(--text-primary); font-size: var(--font-size-base);">Enable Debug Mode</strong>
-                        </div>
-                        <div class="toggle-switch" id="debug-mode" tabindex="0" role="checkbox" aria-checked="false">
-                            <div class="toggle-thumb"></div>
+                <div class="accordion-inner">
+                    <div class="control-group">
+                        <div class="setting-row" style="background: var(--bg-surface); padding: 12px; border-radius: var(--radius-md); border: var(--glass-border);">
+                            <div class="setting-label-block">
+                                <strong style="color: var(--text-primary); font-size: var(--font-size-base);">Enable Debug Mode</strong>
+                            </div>
+                            <div class="toggle-switch" id="debug-mode" tabindex="0" role="checkbox" aria-checked="false">
+                                <div class="toggle-thumb"></div>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div id="debug-content" style="display: none; margin-top: 12px;">
-                    <label style="color: var(--color-error); font-weight: bold; font-size: 12px; margin-bottom: 4px; display: block;">Debug Dump (DD)</label>
-                    <textarea id="debug-dump" class="dd-report" readonly></textarea>
-                    <button id="copy-debug" class="action-btn" style="background: #4b5563; margin-top: 8px;">Copy DD Report</button>
+                    <div id="debug-content" style="display: none; margin-top: 12px;">
+                        <label style="color: var(--color-error); font-weight: bold; font-size: 12px; margin-bottom: 4px; display: block;">Debug Dump (DD)</label>
+                        <textarea id="debug-dump" class="dd-report" readonly></textarea>
+                        <button id="copy-debug" class="action-btn" style="background: #4b5563; margin-top: 8px;">Copy DD Report</button>
+                    </div>
                 </div>
             </div>
         </div>
