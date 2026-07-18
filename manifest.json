@@ -1,8 +1,8 @@
 {
 "manifest_version": 3,
-"name": "Panel Zoom",
+"name": "PanPan",
 "version": "1.0",
-"description": "Guided panel view for long-strip manga readers.",
+"description": "Guided panel view for long-strip manga readers by PanPan.",
 "action": {
 "default_popup": "popup.html"
 },

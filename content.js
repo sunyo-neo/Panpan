@@ -1,6 +1,6 @@
 if (typeof window.panelZoomInjected === 'undefined') {
     window.panelZoomInjected = true;
-    console.log("  Panel Zoom Content Script Injected Successfully!");
+    console.log("  PanPan Content Script Injected Successfully!");
 
     let mangaImages = [];
     let globalPanels = [];
