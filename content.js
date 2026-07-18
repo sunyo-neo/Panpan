@@ -10,10 +10,15 @@ if (typeof window.panelZoomInjected === 'undefined') {
     let isProcessingBackground = false;
     let isFullPageMode = false;
     
-    window.pzViewerSettings = viewerSettings;
-    window.pzPerf = { totalSlicingTime: 0, pagesProcessed: 0, lastRenderTime: 0, memEstimate: "N/A" };
-    window.pzTelemetry = {}; // Stores raw coordinate data for debugging
-    window.pzPageData = {};  // Caches raw extracted boxes for quick re-sorting
+    let pzViewerSettings = viewerSettings;
+    let pzPerf = { totalSlicingTime: 0, pagesProcessed: 0, lastRenderTime: 0, memEstimate: "N/A" };
+    let pzTelemetry = {}; // Stores raw coordinate data for debugging
+    let pzPageData = {};  // Caches raw extracted boxes for quick re-sorting
+
+    // Shared arrays for flood fill to minimize garbage collection pressure
+    let sharedVisited = null;
+    let sharedStackX = null;
+    let sharedStackY = null;
 
     function dynamicSort(boxes, direction) {
         if (boxes.length <= 1) return boxes;
@@ -92,13 +97,18 @@ if (typeof window.panelZoomInjected === 'undefined') {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.action === "START_VIEWER") {
             viewerSettings = request.settings;
-            window.pzViewerSettings = viewerSettings;
+            pzViewerSettings = viewerSettings;
             
             if (overlayHost) {
                 applySettingsUpdate(); // Re-sort and re-render without scanning again
             } else {
                 runScanner();
             }
+        } else if (request.action === "GET_PROBE_DATA") {
+            sendResponse({
+                currentSettings: pzViewerSettings || null,
+                performanceMetrics: pzPerf || "No metrics yet"
+            });
         }
         return true;
     });
@@ -110,7 +120,7 @@ if (typeof window.panelZoomInjected === 'undefined') {
 
         for (let i = 0; i < mangaImages.length; i++) {
             const imgUrl = mangaImages[i];
-            const data = window.pzPageData[imgUrl];
+            const data = pzPageData[imgUrl];
             if (!data) continue;
 
             if (data.rawBoxes.length === 0) {
@@ -174,7 +184,7 @@ if (typeof window.panelZoomInjected === 'undefined') {
                 if (mangaImages[index]) { foundCount++; } 
                 else {
                     allFound = false;
-                    const img = container.querySelector('img[src^="blob:"]');
+                    const img = container.querySelector('img');
                     if (img && img.src) { mangaImages[index] = img.src; foundCount++; timeoutCounter = 0; } 
                     else if (nextToFind === -1) { nextToFind = index; }
                 }
@@ -196,8 +206,8 @@ if (typeof window.panelZoomInjected === 'undefined') {
 
     async function startProcessing(scanUI) {
         globalPanels = [];
-        window.pzPerf.totalSlicingTime = 0;
-        window.pzPerf.pagesProcessed = 0;
+        pzPerf.totalSlicingTime = 0;
+        pzPerf.pagesProcessed = 0;
 
         const firstPagePanels = await extractPanelsFromImage(mangaImages[0]);
         globalPanels.push(...firstPagePanels);
@@ -265,9 +275,17 @@ if (typeof window.panelZoomInjected === 'undefined') {
                     isInk[i] = Math.abs(lum[i] - bgLum) > INK_TOL ? 1 : 0;
                 }
 
-                const visited = new Uint8Array(w * h);
-                const stackX = new Int32Array(w * h);
-                const stackY = new Int32Array(w * h);
+                const requiredSize = w * h;
+                if (!sharedVisited || sharedVisited.length < requiredSize) {
+                    sharedVisited = new Uint8Array(requiredSize);
+                    sharedStackX = new Int32Array(requiredSize);
+                    sharedStackY = new Int32Array(requiredSize);
+                } else {
+                    sharedVisited.fill(0, 0, requiredSize);
+                }
+                const visited = sharedVisited;
+                const stackX = sharedStackX;
+                const stackY = sharedStackY;
                 const rawBoxes = [];
                 const discardedBoxes = []; // NEW: Track failed shapes for debugging
                 
@@ -376,9 +394,9 @@ if (typeof window.panelZoomInjected === 'undefined') {
 
                 if (validBoxes.length === 0) {
                     panels.push({ sx: 0, sy: 0, sw: img.width, sh: img.height, ow: img.width, oh: img.height, url: imgUrl });
-                    window.pzPageData[imgUrl] = { scale: scale, ow: img.width, oh: img.height, rawBoxes: [] };
+                    pzPageData[imgUrl] = { scale: scale, ow: img.width, oh: img.height, rawBoxes: [] };
                 } else {
-                    window.pzPageData[imgUrl] = {
+                    pzPageData[imgUrl] = {
                         scale: scale,
                         ow: img.width,
                         oh: img.height,
@@ -397,7 +415,7 @@ if (typeof window.panelZoomInjected === 'undefined') {
                 }
                 
                 if (viewerSettings.debug) {
-                    window.pzTelemetry[imgUrl] = {
+                    pzTelemetry[imgUrl] = {
                         imageDimensions: { w, h, scale, ow: img.width, oh: img.height },
                         bgLum: bgLum,
                         votes: { lightVotes, darkVotes },
@@ -407,9 +425,9 @@ if (typeof window.panelZoomInjected === 'undefined') {
                     };
                 }
 
-                window.pzPerf.totalSlicingTime += (performance.now() - startTime);
-                window.pzPerf.pagesProcessed++;
-                if (performance.memory) window.pzPerf.memEstimate = Math.round(performance.memory.usedJSHeapSize / 1024 / 1024) + " MB";
+                pzPerf.totalSlicingTime += (performance.now() - startTime);
+                pzPerf.pagesProcessed++;
+                if (performance.memory) pzPerf.memEstimate = Math.round(performance.memory.usedJSHeapSize / 1024 / 1024) + " MB";
                 
                 resolve(panels);
             };
@@ -514,7 +532,7 @@ if (typeof window.panelZoomInjected === 'undefined') {
                     mainImg.style.top = '0px';
                     
                     if (viewerSettings.debug) {
-                        const tel = window.pzTelemetry[p.url];
+                        const tel = pzTelemetry[p.url];
                         if (tel) {
                             // Draw Accepted Panels
                             tel.finalPanels.forEach((panel, idx) => {
@@ -562,7 +580,7 @@ if (typeof window.panelZoomInjected === 'undefined') {
                     mainImg.style.left = (-p.sx * scale) + 'px'; 
                     mainImg.style.top = (-p.sy * scale) + 'px';
                 }
-                window.pzPerf.lastRenderTime = performance.now() - renderStart;
+                pzPerf.lastRenderTime = performance.now() - renderStart;
             };
 
             if (currentLoadedUrl !== p.url) {
@@ -683,7 +701,7 @@ if (typeof window.panelZoomInjected === 'undefined') {
         function dumpTelemetry() {
             if (!viewerSettings.debug) return;
             const currentUrl = globalPanels[currentPanelIndex].url;
-            const data = window.pzTelemetry[currentUrl];
+            const data = pzTelemetry[currentUrl];
             
             if (!data) {
                 helperTxt.textContent = "No telemetry for this page (Debug was OFF during scan).";

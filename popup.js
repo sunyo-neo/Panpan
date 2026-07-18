@@ -11,6 +11,42 @@ document.addEventListener('DOMContentLoaded', async () => {
     const adjCheck = document.getElementById('show-adjacent');
     const debugCheck = document.getElementById('debug-mode');
     
+    // Define checked property on custom div toggles and handle interaction events
+    const initCustomToggle = (el, onChange) => {
+        Object.defineProperty(el, 'checked', {
+            get() {
+                return this.getAttribute('aria-checked') === 'true';
+            },
+            set(value) {
+                this.setAttribute('aria-checked', value ? 'true' : 'false');
+            }
+        });
+
+        const toggle = () => {
+            el.checked = !el.checked;
+            onChange();
+        };
+
+        el.addEventListener('click', toggle);
+        el.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                toggle();
+            }
+        });
+    };
+    
+    // Navigation/Interactive Helpers
+    const makeKeyboardInteractive = (el, onClick) => {
+        el.addEventListener('click', onClick);
+        el.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                onClick();
+            }
+        });
+    };
+    
     // Preview Elements
     const settingsPreview = document.getElementById('settings-preview');
     const debugPreview = document.getElementById('debug-preview');
@@ -31,20 +67,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     let probeData = null;
     let rawError = "None";
 
-    // --- View Navigation Logic ---
+    // --- View Navigation Logic with Animations ---
     const navigateTo = (viewName, titleStr) => {
-        Object.values(views).forEach(v => v.classList.remove('active'));
+        const currentActive = Object.values(views).find(v => v.classList.contains('active'));
+        if (currentActive && currentActive !== views[viewName]) {
+            currentActive.classList.remove('active');
+            currentActive.classList.add('anim-exit');
+            setTimeout(() => {
+                currentActive.classList.remove('anim-exit');
+            }, 250);
+        }
+
+        views[viewName].classList.add('anim-enter');
         views[viewName].classList.add('active');
+        setTimeout(() => {
+            views[viewName].classList.remove('anim-enter');
+        }, 250);
+
         headerTitle.textContent = titleStr;
         backBtn.style.display = viewName === 'home' ? 'none' : 'block';
     };
 
-    document.getElementById('nav-settings').addEventListener('click', () => navigateTo('settings', 'Home > Settings'));
-    document.getElementById('nav-debug').addEventListener('click', () => navigateTo('debug', 'Home > Debug'));
+    const settingsCard = document.getElementById('nav-settings');
+    const debugCard = document.getElementById('nav-debug');
+
+    makeKeyboardInteractive(settingsCard, () => navigateTo('settings', 'Home > Settings'));
+    makeKeyboardInteractive(debugCard, () => navigateTo('debug', 'Home > Debug'));
     
-    // Hovering or clicking the back button returns home seamlessly
+    // Hovering or clicking/pressing returns home seamlessly
     backBtn.addEventListener('mouseenter', () => navigateTo('home', 'Home'));
-    backBtn.addEventListener('click', () => navigateTo('home', 'Home'));
+    makeKeyboardInteractive(backBtn, () => navigateTo('home', 'Home'));
 
     // --- Dynamic Title Expander ---
     chevronBtn.addEventListener('click', () => {
@@ -67,14 +119,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         debugPreview.textContent = debugCheck.checked ? "Status: Enabled (Telemetry On)" : "Status: Disabled";
         debugContent.style.display = debugCheck.checked ? 'block' : 'none';
-        debugPreview.style.color = debugCheck.checked ? "#10b981" : "#888";
+        debugPreview.style.color = debugCheck.checked ? "var(--color-success)" : "#888";
     };
+
+    initCustomToggle(adjCheck, updatePreviews);
+    initCustomToggle(debugCheck, updatePreviews);
 
     // Attach listeners to update previews live
     dirSelect.addEventListener('change', updatePreviews);
     padSelect.addEventListener('change', updatePreviews);
-    adjCheck.addEventListener('change', updatePreviews);
-    debugCheck.addEventListener('change', updatePreviews);
 
     // --- Tab Connection & Probe Logic ---
     try {
@@ -94,16 +147,28 @@ document.addEventListener('DOMContentLoaded', async () => {
                         return {
                             windowUrl: window.location.href,
                             totalContainers: document.querySelectorAll('.page-container').length,
-                            blobImages: document.querySelectorAll('img[src^="blob:"]').length,
+                            blobImages: document.querySelectorAll('img').length,
                             readyState: document.readyState,
                             contentScriptLoaded: typeof window.panelZoomInjected !== 'undefined',
                             isViewerActive: document.getElementById('panel-zoom-extension-host') !== null,
-                            currentSettings: window.pzViewerSettings || null,
-                            performanceMetrics: window.pzPerf || "No metrics yet"
+                            currentSettings: null,
+                            performanceMetrics: "No metrics yet"
                         };
                     }
                 });
-                return results && results[0] ? results[0].result : null;
+                const probe = results && results[0] ? results[0].result : null;
+                if (probe && probe.contentScriptLoaded) {
+                    try {
+                        const response = await chrome.tabs.sendMessage(currentTab.id, { action: "GET_PROBE_DATA" });
+                        if (response) {
+                            probe.currentSettings = response.currentSettings;
+                            probe.performanceMetrics = response.performanceMetrics;
+                        }
+                    } catch (err) {
+                        console.warn("Failed to fetch probe data via messaging:", err);
+                    }
+                }
+                return probe;
             } catch (e) {
                 rawError = e.message;
                 return null;
@@ -147,10 +212,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             if (probeData.isViewerActive) {
                 startBtn.textContent = "Apply Change";
-                startBtn.style.background = "#f59e0b";
+                startBtn.style.background = "linear-gradient(135deg, var(--color-warning) 0%, #d97706 100%)";
             } else {
                 startBtn.textContent = "Launch Panel View";
-                startBtn.style.background = "#10b981";
+                startBtn.style.background = "var(--primary-gradient)";
             }
         } else {
             titleEl.textContent = "Injection Blocked by Browser";

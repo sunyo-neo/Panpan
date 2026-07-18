@@ -4,135 +4,465 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PanPan Settings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            /* Background System */
+            --bg-base: #09090b;
+            --bg-surface: rgba(24, 24, 27, 0.65);
+            --bg-elevated: rgba(39, 39, 42, 0.8);
+            --bg-glass-overlay: rgba(0, 0, 0, 0.4);
+            
+            /* Brand Colors */
+            --primary-solid: #6366f1;
+            --primary-gradient-start: #8b5cf6;
+            --primary-gradient-end: #3b82f6;
+            --primary-gradient: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            
+            /* Semantic Colors */
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-error: #ef4444;
+            
+            /* Typography Scale */
+            --text-primary: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            
+            --font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-size-micro: 0.625rem;  /* 10px */
+            --font-size-sm: 0.75rem;      /* 12px */
+            --font-size-base: 0.875rem;   /* 14px */
+            --font-size-lg: 1rem;         /* 16px */
+            
+            /* Spacing System */
+            --space-1: 0.25rem;   /* 4px */
+            --space-2: 0.5rem;    /* 8px */
+            --space-3: 0.75rem;   /* 12px */
+            --space-4: 1rem;      /* 16px */
+            --space-6: 1.5rem;    /* 24px */
+            
+            /* Border Radius */
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-pill: 9999px;
+            
+            /* Effects */
+            --shadow-ambient: 0 4px 20px rgba(0, 0, 0, 0.4);
+            --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+            --transition-fast: 0.2s ease-out;
+            --transition-normal: 0.3s ease-out;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #1a1a1a;
-            color: #f0f0f0;
+            font-family: var(--font-family);
+            background-color: var(--bg-base);
+            color: var(--text-primary);
             margin: 0;
-            padding: 16px;
+            padding: var(--space-4);
             width: 320px;
+            box-sizing: border-box;
         }
         
         /* Navigation Header */
-        .header { display: flex; align-items: center; font-size: 16px; font-weight: bold; border-bottom: 1px solid #333; padding-bottom: 8px; margin-bottom: 12px; }
-        .back-btn { display: none; cursor: pointer; color: #3b82f6; margin-right: 8px; font-weight: bold; font-size: 18px; padding: 0 4px; user-select: none; }
-        .back-btn:hover { color: #60a5fa; }
+        .header {
+            display: flex;
+            align-items: center;
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            border-bottom: var(--glass-border);
+            padding-bottom: var(--space-2);
+            margin-bottom: var(--space-3);
+        }
+        .back-btn {
+            display: none;
+            cursor: pointer;
+            margin-right: var(--space-2);
+            padding: var(--space-1);
+            border-radius: var(--radius-sm);
+            transition: background var(--transition-fast);
+            line-height: 0;
+        }
+        .back-btn:hover {
+            background: var(--bg-elevated);
+        }
+        .back-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: var(--primary-solid);
+        }
         
         /* View State Management */
-        .view { display: none; }
-        .view.active { display: block; animation: fadeIn 0.2s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
+        .view-container {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            height: auto;
+        }
+        .view {
+            display: none;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .view.active {
+            display: block;
+        }
+        .view.anim-enter {
+            display: block;
+            animation: slideIn 0.25s forwards var(--transition-normal);
+        }
+        .view.anim-exit {
+            display: block;
+            animation: slideOut 0.25s forwards var(--transition-normal);
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(15px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideOut {
+            from { opacity: 1; transform: translateX(0); }
+            to { opacity: 0; transform: translateX(-15px); }
+        }
 
         /* Home View Specifics */
-        .info-box { background: #2a2a2a; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
-        .info-text { font-size: 13px; margin: 4px 0; color: #aaa; }
-        .info-text span { color: #fff; font-weight: 500; }
+        .info-box {
+            background: var(--bg-surface);
+            border: var(--glass-border);
+            backdrop-filter: blur(12px);
+            padding: var(--space-3);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-3);
+            box-shadow: var(--shadow-ambient);
+        }
+        .info-text {
+            font-size: var(--font-size-sm);
+            margin: var(--space-1) 0;
+            color: var(--text-secondary);
+        }
+        .info-text span {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
         
         /* Title Clamping */
-        .title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; border-bottom: 1px solid #3a3a3a; padding-bottom: 8px; }
-        .manga-title { flex: 1; font-size: 14px; font-weight: 600; color: #fff; margin: 0; word-break: break-word; line-height: 1.4; }
-        .manga-title.clamped { display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .chevron { background: none; border: none; color: #888; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; height: 20px; width: 20px; }
-        .chevron:hover { color: #fff; }
-        .chevron::after { content: ''; display: block; width: 6px; height: 6px; border-bottom: 2px solid currentColor; border-right: 2px solid currentColor; transform: rotate(45deg); transition: transform 0.2s; }
-        .chevron.expanded::after { transform: rotate(-135deg) translate(-2px, -2px); }
+        .title-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: var(--space-2);
+            margin-bottom: var(--space-2);
+            border-bottom: var(--glass-border);
+            padding-bottom: var(--space-2);
+        }
+        .manga-title {
+            flex: 1;
+            font-size: var(--font-size-base);
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+            word-break: break-word;
+            line-height: 1.4;
+        }
+        .manga-title.clamped {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .chevron {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: var(--space-1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 20px;
+            width: 20px;
+            transition: color var(--transition-fast);
+        }
+        .chevron:hover {
+            color: var(--text-primary);
+        }
+        .chevron::after {
+            content: '';
+            display: block;
+            width: 6px;
+            height: 6px;
+            border-bottom: 2px solid currentColor;
+            border-right: 2px solid currentColor;
+            transform: rotate(45deg);
+            transition: transform var(--transition-fast);
+        }
+        .chevron.expanded::after {
+            transform: rotate(-135deg) translate(-2px, -2px);
+        }
 
         /* Menu Cards */
-        .menu-card { background: #222; border: 1px solid #333; border-radius: 8px; padding: 12px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; }
-        .menu-card:hover { background: #2a2a2a; border-color: #444; }
-        .menu-card-left { display: flex; flex-direction: column; }
-        .menu-title { font-weight: 600; color: #fff; font-size: 14px; margin-bottom: 4px; }
-        .menu-preview { color: #888; font-size: 12px; }
-        .menu-arrow { color: #666; font-weight: bold; font-size: 16px; }
+        .menu-card {
+            background: var(--bg-surface);
+            border: var(--glass-border);
+            backdrop-filter: blur(12px);
+            border-radius: var(--radius-md);
+            padding: var(--space-3);
+            margin-bottom: var(--space-2);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+            box-shadow: var(--shadow-ambient);
+        }
+        .menu-card:hover,
+        .menu-card:focus-visible {
+            background: var(--bg-elevated);
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+        .menu-card:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 2px var(--primary-solid);
+        }
+        .menu-card-left {
+            display: flex;
+            flex-direction: column;
+        }
+        .menu-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: var(--font-size-base);
+            margin-bottom: var(--space-1);
+        }
+        .menu-preview {
+            color: var(--text-secondary);
+            font-size: var(--font-size-sm);
+        }
+        .menu-arrow {
+            color: var(--text-secondary);
+            font-weight: bold;
+            font-size: var(--font-size-lg);
+            transition: color var(--transition-fast);
+        }
+        .menu-card:hover .menu-arrow {
+            color: var(--text-primary);
+        }
 
         /* Form Elements */
-        .control-group { margin-bottom: 12px; }
-        label { display: block; font-size: 13px; margin-bottom: 6px; color: #ddd; }
-        select, input[type="checkbox"] { background: #333; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 6px; width: 100%; box-sizing: border-box; }
-        .checkbox-label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
-        .checkbox-label input { width: auto; }
+        .control-group {
+            margin-bottom: var(--space-3);
+        }
+        label {
+            display: block;
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--space-2);
+            color: var(--text-secondary);
+        }
+        select {
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            border: var(--glass-border);
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--radius-sm);
+            width: 100%;
+            box-sizing: border-box;
+            font-family: var(--font-family);
+            font-size: var(--font-size-base);
+            outline: none;
+            transition: border-color var(--transition-fast), background var(--transition-fast);
+        }
+        select:focus {
+            border-color: var(--primary-solid);
+            background: var(--bg-elevated);
+        }
         
-        button.action-btn { width: 100%; background: #3b82f6; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: 600; cursor: pointer; transition: background 0.2s; margin-top: 8px; }
-        button.action-btn:hover { filter: brightness(1.1); }
-        button.action-btn:disabled { background: #444 !important; color: #888; cursor: not-allowed; }
+        /* Custom Switch Toggles */
+        .setting-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .setting-label {
+            font-size: var(--font-size-base);
+            color: var(--text-secondary);
+        }
+        .toggle-switch {
+            width: 44px;
+            height: 24px;
+            background-color: var(--text-muted);
+            border-radius: var(--radius-pill);
+            position: relative;
+            cursor: pointer;
+            transition: background-color var(--transition-fast);
+            outline: none;
+        }
+        .toggle-switch:focus-visible {
+            box-shadow: 0 0 0 2px var(--primary-solid);
+        }
+        .toggle-switch[aria-checked="true"] {
+            background-color: var(--primary-solid);
+        }
+        .toggle-thumb {
+            width: 18px;
+            height: 18px;
+            background-color: #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            transition: transform var(--transition-fast);
+        }
+        .toggle-switch[aria-checked="true"] .toggle-thumb {
+            transform: translateX(20px);
+        }
         
-        textarea.dd-report { width: 100%; height: 120px; background: #111; color: #10b981; font-family: monospace; font-size: 11px; padding: 8px; border: 1px solid #333; border-radius: 6px; resize: none; box-sizing: border-box; }
+        button.action-btn {
+            width: 100%;
+            background: var(--primary-gradient);
+            color: var(--text-primary);
+            border: none;
+            padding: var(--space-3);
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast), opacity var(--transition-fast), background var(--transition-fast);
+            margin-top: var(--space-2);
+            font-family: var(--font-family);
+            font-size: var(--font-size-base);
+        }
+        button.action-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+        }
+        button.action-btn:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+        button.action-btn:disabled {
+            background: var(--bg-elevated) !important;
+            color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        button.action-btn:not(:disabled) {
+            box-shadow: 0 4px 14px 0 rgba(139, 92, 246, 0.4);
+            animation: pulse-shadow 2s infinite;
+        }
+        @keyframes pulse-shadow {
+            0% {
+                box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.6);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(139, 92, 246, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
+            }
+        }
+        
+        textarea.dd-report {
+            width: 100%;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.4);
+            color: var(--color-success);
+            font-family: monospace;
+            font-size: 11px;
+            padding: var(--space-2);
+            border: var(--glass-border);
+            border-radius: var(--radius-sm);
+            resize: none;
+            box-sizing: border-box;
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <span class="back-btn" id="back-btn" title="Return Home">&lt;</span>
+        <span class="back-btn" id="back-btn" aria-label="Back" role="button" tabindex="0">
+            <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; display: block;">
+                <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" />
+            </svg>
+        </span>
         <span id="header-title">Home</span>
     </div>
     
-    <!-- HOME VIEW -->
-    <div id="view-home" class="view active">
-        <div class="info-box">
-            <div class="title-row">
-                <div id="manga-title" class="manga-title clamped">Loading...</div>
-                <button id="title-chevron" class="chevron" title="Expand Title"></button>
+    <div class="view-container">
+        <!-- HOME VIEW -->
+        <div id="view-home" class="view active">
+            <div class="info-box">
+                <div class="title-row">
+                    <div id="manga-title" class="manga-title clamped">Loading...</div>
+                    <button id="title-chevron" class="chevron" title="Expand Title"></button>
+                </div>
+                <p class="info-text" id="image-count">Images Found: <span>0</span></p>
             </div>
-            <p class="info-text" id="image-count">Images Found: <span>0</span></p>
-        </div>
 
-        <div class="menu-card" id="nav-settings">
-            <div class="menu-card-left">
-                <span class="menu-title">Settings</span>
-                <span class="menu-preview" id="settings-preview">Manga • 5% Pad • Adj On</span>
+            <div class="menu-card" id="nav-settings" role="button" tabindex="0">
+                <div class="menu-card-left">
+                    <span class="menu-title">Settings</span>
+                    <span class="menu-preview" id="settings-preview">Manga • 5% Pad • Adj On</span>
+                </div>
+                <span class="menu-arrow">&gt;</span>
             </div>
-            <span class="menu-arrow">&gt;</span>
-        </div>
 
-        <div class="menu-card" id="nav-debug">
-            <div class="menu-card-left">
-                <span class="menu-title">Debug & Telemetry</span>
-                <span class="menu-preview" id="debug-preview">Status: Disabled</span>
+            <div class="menu-card" id="nav-debug" role="button" tabindex="0">
+                <div class="menu-card-left">
+                    <span class="menu-title">Debug & Telemetry</span>
+                    <span class="menu-preview" id="debug-preview">Status: Disabled</span>
+                </div>
+                <span class="menu-arrow">&gt;</span>
             </div>
-            <span class="menu-arrow">&gt;</span>
+
+            <button id="start-btn" class="action-btn" disabled>Launch Panel View</button>
         </div>
 
-        <button id="start-btn" class="action-btn" disabled>Launch Panel View</button>
-    </div>
+        <!-- SETTINGS VIEW -->
+        <div id="view-settings" class="view">
+            <div class="control-group">
+                <label for="reading-direction">Reading Direction</label>
+                <select id="reading-direction">
+                    <option value="manga" selected>Manga (Right-to-Left)</option>
+                    <option value="comic">Comic (Left-to-Right)</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label for="padding">Panel Padding</label>
+                <select id="padding">
+                    <option value="0">None (0%)</option>
+                    <option value="2">Tight (2%)</option>
+                    <option value="5" selected>Normal (5%)</option>
+                    <option value="10">Loose (10%)</option>
+                </select>
+            </div>
+            <div class="control-group" style="margin-top: 16px;">
+                <div class="setting-row">
+                    <span class="setting-label">Show Adjacent Panels</span>
+                    <div class="toggle-switch" id="show-adjacent" tabindex="0" role="checkbox" aria-checked="true">
+                        <div class="toggle-thumb"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <!-- SETTINGS VIEW -->
-    <div id="view-settings" class="view">
-        <div class="control-group">
-            <label for="reading-direction">Reading Direction</label>
-            <select id="reading-direction">
-                <option value="manga" selected>Manga (Right-to-Left)</option>
-                <option value="comic">Comic (Left-to-Right)</option>
-            </select>
-        </div>
-        <div class="control-group">
-            <label for="padding">Panel Padding</label>
-            <select id="padding">
-                <option value="0">None (0%)</option>
-                <option value="2">Tight (2%)</option>
-                <option value="5" selected>Normal (5%)</option>
-                <option value="10">Loose (10%)</option>
-            </select>
-        </div>
-        <div class="control-group" style="margin-top: 16px;">
-            <label class="checkbox-label">
-                <input type="checkbox" id="show-adjacent" checked>
-                Show Adjacent Panels
-            </label>
-        </div>
-    </div>
-
-    <!-- DEBUG VIEW -->
-    <div id="view-debug" class="view">
-        <div class="control-group" style="margin-bottom: 16px;">
-            <label class="checkbox-label" style="background: #2a2a2a; padding: 12px; border-radius: 6px; border: 1px solid #444;">
-                <input type="checkbox" id="debug-mode">
-                <strong style="color: #fff;">Enable Debug Mode</strong>
-            </label>
-        </div>
-        <div id="debug-content" style="display: none;">
-            <label style="color: #ef4444; font-weight: bold; font-size: 12px; margin-bottom: 4px; display: block;">Debug Dump (DD)</label>
-            <textarea id="debug-dump" class="dd-report" readonly></textarea>
-            <button id="copy-debug" class="action-btn" style="background: #4b5563; margin-top: 8px;">Copy DD Report</button>
+        <!-- DEBUG VIEW -->
+        <div id="view-debug" class="view">
+            <div class="control-group" style="margin-bottom: 16px;">
+                <div class="setting-row" style="background: var(--bg-surface); padding: 12px; border-radius: var(--radius-md); border: var(--glass-border);">
+                    <div class="setting-label-block">
+                        <strong style="color: var(--text-primary); font-size: var(--font-size-base);">Enable Debug Mode</strong>
+                    </div>
+                    <div class="toggle-switch" id="debug-mode" tabindex="0" role="checkbox" aria-checked="false">
+                        <div class="toggle-thumb"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="debug-content" style="display: none;">
+                <label style="color: var(--color-error); font-weight: bold; font-size: 12px; margin-bottom: 4px; display: block;">Debug Dump (DD)</label>
+                <textarea id="debug-dump" class="dd-report" readonly></textarea>
+                <button id="copy-debug" class="action-btn" style="background: #4b5563; margin-top: 8px;">Copy DD Report</button>
+            </div>
         </div>
     </div>
 
