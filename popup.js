@@ -90,8 +90,7 @@ document.addEventListener('DOMContentLoaded', async () => {
  
     makeKeyboardInteractive(settingsCard, () => navigateTo('settings', 'Home > Settings'));
     
-    // Hovering or clicking/pressing returns home seamlessly
-    backBtn.addEventListener('mouseenter', () => navigateTo('home', 'Home'));
+    // Clicking/pressing returns home seamlessly
     makeKeyboardInteractive(backBtn, () => navigateTo('home', 'Home'));
 
     // --- Dynamic Title Expander ---
