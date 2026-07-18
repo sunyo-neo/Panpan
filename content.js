@@ -168,8 +168,32 @@ if (typeof window.panelZoomInjected === 'undefined') {
         document.body.style.overflow = 'hidden';
         
         const scanUI = document.createElement('div');
-        scanUI.style.cssText = `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.95); color: #10b981; z-index: 2147483647; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: monospace; font-size: 24px; font-weight: bold;`;
-        scanUI.innerHTML = `<div id="pz-scan-text">PAC-MAN SCANNING: 0 / ${totalPages}</div>`;
+        scanUI.style.cssText = `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(9, 9, 11, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 2147483647; display: flex; flex-direction: column; align-items: center; justify-content: center;`;
+        scanUI.innerHTML = `
+            <style>
+                @keyframes pulse-ring {
+                    0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7); }
+                    70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(139, 92, 246, 0); }
+                    100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+                }
+                .pz-spinner {
+                    width: 40px; height: 40px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+                    animation: pulse-ring 2s infinite;
+                    margin-bottom: 16px;
+                }
+                .pz-scan-text {
+                    font-family: 'Outfit', sans-serif;
+                    color: #fafafa;
+                    font-size: 18px;
+                    font-weight: 500;
+                    letter-spacing: 1px;
+                }
+            </style>
+            <div class="pz-spinner"></div>
+            <div id="pz-scan-text" class="pz-scan-text">PANPAN SCANNING: 0 / ${totalPages}</div>
+        `;
         document.body.appendChild(scanUI);
 
         mangaImages = new Array(totalPages).fill(null);
@@ -190,12 +214,12 @@ if (typeof window.panelZoomInjected === 'undefined') {
                 }
             });
 
-            document.getElementById('pz-scan-text').textContent = `PAC-MAN SCANNING: ${foundCount} / ${totalPages}`;
+            document.getElementById('pz-scan-text').textContent = `PANPAN SCANNING: ${foundCount} / ${totalPages}`;
 
             if (allFound || timeoutCounter > 50) { 
                 clearInterval(scanInterval);
                 mangaImages = mangaImages.filter(src => src !== null);
-                document.getElementById('pz-scan-text').textContent = "SLICING PAGE 1...";
+                document.getElementById('pz-scan-text').textContent = "SLICING PAGES...";
                 startProcessing(scanUI);
             } else {
                 containers[nextToFind].scrollIntoView({ behavior: 'instant', block: 'center' });
@@ -440,42 +464,266 @@ if (typeof window.panelZoomInjected === 'undefined') {
 
         overlayHost = document.createElement('div');
         overlayHost.id = "panel-zoom-extension-host";
-        overlayHost.style.cssText = `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2147483647; background: #080808;`;
+        overlayHost.style.cssText = `position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 2147483647; background: #000000;`;
         
         const shadow = overlayHost.attachShadow({mode: 'closed'});
         const showAdj = viewerSettings.showAdjacent === true || viewerSettings.showAdjacent === "true";
         
         shadow.innerHTML = `
             <style>
+                @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+                
+                :host {
+                    /* Background System */
+                    --bg-base: #000000;
+                    --bg-surface: rgba(24, 24, 27, 0.65);
+                    --bg-elevated: rgba(39, 39, 42, 0.8);
+                    
+                    /* Brand Colors */
+                    --primary-solid: #6366f1;
+                    --primary-gradient-start: #8b5cf6;
+                    --primary-gradient-end: #3b82f6;
+                    --primary-gradient: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+                    
+                    /* Semantic Colors */
+                    --color-success: #10b981;
+                    --color-warning: #f59e0b;
+                    --color-error: #ef4444;
+                    
+                    /* Typography Scale */
+                    --text-primary: #fafafa;
+                    --text-secondary: #a1a1aa;
+                    --text-muted: #71717a;
+                    
+                    --font-family: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                    --font-size-micro: 0.625rem;  /* 10px */
+                    --font-size-sm: 0.75rem;      /* 12px */
+                    --font-size-base: 0.875rem;   /* 14px */
+                    --font-size-lg: 1rem;         /* 16px */
+                    
+                    /* Spacing System */
+                    --space-1: 0.25rem;   /* 4px */
+                    --space-2: 0.5rem;    /* 8px */
+                    --space-3: 0.75rem;   /* 12px */
+                    --space-4: 1rem;      /* 16px */
+                    --space-6: 1.5rem;    /* 24px */
+                    
+                    /* Border Radius */
+                    --radius-sm: 6px;
+                    --radius-md: 12px;
+                    --radius-lg: 16px;
+                    --radius-pill: 9999px;
+                    
+                    /* Effects */
+                    --shadow-ambient: 0 4px 20px rgba(0, 0, 0, 0.4);
+                    --glass-border: 1px solid rgba(255, 255, 255, 0.08);
+                    --transition-fast: 0.2s ease-out;
+                    --transition-normal: 0.3s ease-out;
+                }
+
                 * { user-select: none; -webkit-user-select: none; }
-                .viewer-container { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100vw; height: 100vh; position: relative; }
-                .image-wrapper { position: relative; overflow: ${showAdj ? 'visible' : 'hidden'}; box-shadow: ${showAdj ? 'none' : '0 10px 40px rgba(0,0,0,0.8)'}; visibility: hidden; }
-                .manga-image { position: absolute; max-width: none !important; max-height: none !important; will-change: transform; transform: translateZ(0); }
-                .nav-zone { position: absolute; top: 0; height: 100%; width: 30%; cursor: pointer; z-index: 10; }
-                .nav-left { left: 0; } .nav-right { right: 0; }
-                .top-bar { position: absolute; top: 0; left: 0; right: 0; padding: 16px; display: flex; justify-content: space-between; align-items: center; color: #fff; font-family: sans-serif; background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent); z-index: 20; opacity: 0; transition: opacity 0.3s; }
-                .viewer-container:hover .top-bar { opacity: 1; }
-                .close-btn { background: #ef4444; border: none; color: white; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-left: 8px;}
-                .full-page-btn { background: #3b82f6; border: none; color: white; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-                .copy-tel-btn { background: #8b5cf6; border: none; color: white; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; margin-right: 8px; }
-                .counter { font-size: 14px; font-weight: 500; text-shadow: 1px 1px 2px black; display: flex; gap: 12px;}
-                .counter span { color: #10b981; font-weight: bold; }
-                .loading-spinner { position: absolute; top: 20px; right: 300px; color: #3b82f6; font-size: 12px; font-weight: bold; display: none; }
-                .helper-text { position: absolute; bottom: 20px; background: rgba(0,0,0,0.7); padding: 8px 16px; border-radius: 20px; color: #fff; font-size: 14px; font-family: sans-serif; pointer-events: none; z-index: 20; display: none; }
+                .viewer-container {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    width: 100vw;
+                    height: 100vh;
+                    position: relative;
+                    background-color: var(--bg-base);
+                }
+                .image-wrapper {
+                    position: relative;
+                    overflow: ${showAdj ? 'visible' : 'hidden'};
+                    box-shadow: ${showAdj ? 'none' : '0 10px 40px rgba(0,0,0,0.8)'};
+                    visibility: hidden;
+                    transition: transform 0.3s ease-out, width 0.3s ease-out, height 0.3s ease-out;
+                    will-change: transform, width, height;
+                }
+                .manga-image {
+                    position: absolute;
+                    max-width: none !important;
+                    max-height: none !important;
+                    will-change: transform, left, top, width, height;
+                    transform: translateZ(0);
+                    transition: transform 0.3s ease-out, left 0.3s ease-out, top 0.3s ease-out, width 0.3s ease-out, height 0.3s ease-out;
+                }
+                .nav-zone {
+                    position: absolute;
+                    top: 0;
+                    height: 100%;
+                    width: 30%;
+                    z-index: 10;
+                    transition: background var(--transition-normal);
+                }
+                .nav-left {
+                    left: 0;
+                }
+                .nav-left:hover {
+                    background: linear-gradient(to right, rgba(255, 255, 255, 0.05), transparent);
+                    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0px 2px 4px rgba(0,0,0,0.8));"><polyline points="15 18 9 12 15 6"></polyline></svg>') 16 16, pointer;
+                }
+                .nav-right {
+                    right: 0;
+                }
+                .nav-right:hover {
+                    background: linear-gradient(to left, rgba(255, 255, 255, 0.05), transparent);
+                    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0px 2px 4px rgba(0,0,0,0.8));"><polyline points="9 18 15 12 9 6"></polyline></svg>') 16 16, pointer;
+                }
+                
+                .top-bar {
+                    position: absolute;
+                    top: 24px;
+                    left: 50%;
+                    transform: translateX(-50%) translateY(-20px);
+                    padding: 8px 24px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    gap: 24px;
+                    color: var(--text-primary);
+                    font-family: var(--font-family);
+                    background: var(--bg-surface);
+                    backdrop-filter: blur(12px);
+                    -webkit-backdrop-filter: blur(12px);
+                    border: var(--glass-border);
+                    border-radius: 24px;
+                    z-index: 20;
+                    opacity: 0;
+                    visibility: hidden;
+                    transition: opacity var(--transition-normal), transform var(--transition-normal), visibility var(--transition-normal);
+                    box-shadow: var(--shadow-ambient);
+                    white-space: nowrap;
+                }
+                .viewer-container:hover .top-bar {
+                    opacity: 1;
+                    visibility: visible;
+                    transform: translateX(-50%) translateY(0);
+                }
+                
+                .close-btn, .full-page-btn, .copy-tel-btn {
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    color: var(--text-primary);
+                    padding: 6px 14px;
+                    border-radius: var(--radius-pill);
+                    cursor: pointer;
+                    font-family: var(--font-family);
+                    font-size: var(--font-size-sm);
+                    font-weight: 600;
+                    transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+                    margin-left: 6px;
+                }
+                .close-btn {
+                    background: rgba(239, 68, 68, 0.15);
+                    border-color: rgba(239, 68, 68, 0.3);
+                }
+                .close-btn:hover {
+                    background: rgba(239, 68, 68, 0.4);
+                    border-color: rgba(239, 68, 68, 0.6);
+                    transform: translateY(-1px);
+                }
+                .full-page-btn {
+                    background: rgba(59, 130, 246, 0.15);
+                    border-color: rgba(59, 130, 246, 0.3);
+                }
+                .full-page-btn:hover {
+                    background: rgba(59, 130, 246, 0.4);
+                    border-color: rgba(59, 130, 246, 0.6);
+                    transform: translateY(-1px);
+                }
+                .copy-tel-btn {
+                    background: rgba(139, 92, 246, 0.15);
+                    border-color: rgba(139, 92, 246, 0.3);
+                }
+                .copy-tel-btn:hover {
+                    background: rgba(139, 92, 246, 0.4);
+                    border-color: rgba(139, 92, 246, 0.6);
+                    transform: translateY(-1px);
+                }
+                
+                .counter {
+                    font-size: var(--font-size-base);
+                    font-family: var(--font-family);
+                    color: var(--text-secondary);
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                }
+                .counter span {
+                    color: var(--text-primary);
+                    font-weight: 600;
+                }
+                
+                .loading-spinner {
+                    position: absolute;
+                    top: 24px;
+                    right: 24px;
+                    display: none;
+                    align-items: center;
+                    gap: 8px;
+                    color: var(--text-primary);
+                    font-family: var(--font-family);
+                    font-size: var(--font-size-sm);
+                    font-weight: 500;
+                    background: var(--bg-surface);
+                    backdrop-filter: blur(12px);
+                    -webkit-backdrop-filter: blur(12px);
+                    border: var(--glass-border);
+                    border-radius: var(--radius-pill);
+                    padding: 8px 16px;
+                    box-shadow: var(--shadow-ambient);
+                    z-index: 30;
+                }
+                .spinner-icon {
+                    width: 14px;
+                    height: 14px;
+                    border: 2px solid rgba(255, 255, 255, 0.1);
+                    border-top-color: var(--primary-solid);
+                    border-radius: 50%;
+                    animation: spin 0.8s linear infinite;
+                }
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
+                }
+                
+                .helper-text {
+                    position: absolute;
+                    bottom: 24px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: var(--bg-surface);
+                    backdrop-filter: blur(12px);
+                    -webkit-backdrop-filter: blur(12px);
+                    border: var(--glass-border);
+                    padding: 8px 18px;
+                    border-radius: var(--radius-pill);
+                    color: var(--text-primary);
+                    font-size: var(--font-size-base);
+                    font-family: var(--font-family);
+                    pointer-events: none;
+                    z-index: 20;
+                    box-shadow: var(--shadow-ambient);
+                    transition: opacity var(--transition-normal), visibility var(--transition-normal);
+                    opacity: 0;
+                    visibility: hidden;
+                }
             </style>
             <div class="viewer-container">
                 <div class="top-bar">
                     <div class="counter">
-                        <div>Page <span id="curr-page-num">1</span>/<span id="total-page-num">1</span></div>
-                        <div style="color: #666;">|</div>
-                        <div>Panel <span id="curr-panel-num">1</span>/<span id="total-panel-num">1</span></div>
+                        <div>Page <span id="curr-page-num">1</span> • <span id="total-page-num">1</span></div>
+                        <div style="color: rgba(255,255,255,0.2); margin: 0 4px;">•</div>
+                        <div>Panel <span id="curr-panel-num">1</span> • <span id="total-panel-num">1</span></div>
                     </div>
-                    <div class="loading-spinner" id="bg-loader">Slicing Background Pages...</div>
                     <div>
                         <button class="copy-tel-btn" id="copy-telemetry-btn" style="display: ${viewerSettings.debug ? 'inline-block' : 'none'};">Copy Telemetry</button>
                         <button class="full-page-btn" id="toggle-full-page">Toggle Full Page (P)</button>
                         <button class="close-btn" id="close-viewer">Exit Viewer</button>
                     </div>
+                </div>
+                <div class="loading-spinner" id="bg-loader">
+                    <div class="spinner-icon"></div>
+                    <span>Slicing Background Pages...</span>
                 </div>
                 <div class="nav-zone nav-left" id="zone-prev"></div>
                 <div class="nav-zone nav-right" id="zone-next"></div>
@@ -484,18 +732,19 @@ if (typeof window.panelZoomInjected === 'undefined') {
             </div>
         `;
         document.body.appendChild(overlayHost);
-
+ 
         const wrapperEl = shadow.getElementById('pz-wrapper');
         const mainImg = shadow.getElementById('main-display');
         const loader = shadow.getElementById('bg-loader');
         const helperTxt = shadow.getElementById('helper-txt');
         
         let currentLoadedUrl = "";
+        let helperTimeout = null;
         
         const renderCurrent = () => {
             const renderStart = performance.now();
             if (currentPanelIndex >= globalPanels.length) return;
-            loader.style.display = isProcessingBackground && currentPanelIndex > globalPanels.length - 5 ? 'block' : 'none';
+            loader.style.display = isProcessingBackground && currentPanelIndex > globalPanels.length - 5 ? 'flex' : 'none';
             const p = globalPanels[currentPanelIndex];
             
             // UI Counters
@@ -522,7 +771,13 @@ if (typeof window.panelZoomInjected === 'undefined') {
 
                 if (isFullPageMode) {
                     helperTxt.textContent = "Double-click a panel to zoom in!";
-                    helperTxt.style.display = 'block';
+                    helperTxt.style.opacity = '1';
+                    helperTxt.style.visibility = 'visible';
+                    if (helperTimeout) clearTimeout(helperTimeout);
+                    helperTimeout = setTimeout(() => {
+                        helperTxt.style.opacity = '0';
+                        helperTxt.style.visibility = 'hidden';
+                    }, 3500);
                     const scale = Math.min((viewW * 0.95) / p.ow, (viewH * 0.95) / p.oh);
                     wrapperEl.style.width = (p.ow * scale) + 'px'; 
                     wrapperEl.style.height = (p.oh * scale) + 'px';
@@ -564,7 +819,9 @@ if (typeof window.panelZoomInjected === 'undefined') {
                         }
                     }
                 } else {
-                    helperTxt.style.display = 'none';
+                    helperTxt.style.opacity = '0';
+                    helperTxt.style.visibility = 'hidden';
+                    if (helperTimeout) clearTimeout(helperTimeout);
                     
                     // Fixed Padding spatial math: applies padding to viewport dimensions cleanly
                     const margin = viewerSettings.padding / 100;
@@ -705,16 +962,28 @@ if (typeof window.panelZoomInjected === 'undefined') {
             
             if (!data) {
                 helperTxt.textContent = "No telemetry for this page (Debug was OFF during scan).";
-                helperTxt.style.display = 'block';
-                setTimeout(() => { if (isFullPageMode) helperTxt.textContent = "Double-click a panel to zoom in!"; else helperTxt.style.display = 'none'; }, 3000);
+                helperTxt.style.opacity = '1';
+                helperTxt.style.visibility = 'visible';
+                if (helperTimeout) clearTimeout(helperTimeout);
+                helperTimeout = setTimeout(() => {
+                    if (isFullPageMode) helperTxt.textContent = "Double-click a panel to zoom in!";
+                    helperTxt.style.opacity = '0';
+                    helperTxt.style.visibility = 'hidden';
+                }, 3000);
                 return;
             }
 
             const report = JSON.stringify({ targetPage: currentUrl, data: data }, null, 2);
             navigator.clipboard.writeText(report).then(() => {
                 helperTxt.textContent = "Telemetry copied to clipboard!";
-                helperTxt.style.display = 'block';
-                setTimeout(() => { if (isFullPageMode) helperTxt.textContent = "Double-click a panel to zoom in!"; else helperTxt.style.display = 'none'; }, 3000);
+                helperTxt.style.opacity = '1';
+                helperTxt.style.visibility = 'visible';
+                if (helperTimeout) clearTimeout(helperTimeout);
+                helperTimeout = setTimeout(() => {
+                    if (isFullPageMode) helperTxt.textContent = "Double-click a panel to zoom in!";
+                    helperTxt.style.opacity = '0';
+                    helperTxt.style.visibility = 'hidden';
+                }, 3000);
             });
         }
 

@@ -49,7 +49,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Preview Elements
     const settingsPreview = document.getElementById('settings-preview');
-    const debugPreview = document.getElementById('debug-preview');
     const debugContent = document.getElementById('debug-content');
     const debugDumpBtn = document.getElementById('copy-debug');
     const debugTextArea = document.getElementById('debug-dump');
@@ -57,16 +56,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Navigation Elements
     const views = {
         home: document.getElementById('view-home'),
-        settings: document.getElementById('view-settings'),
-        debug: document.getElementById('view-debug')
+        settings: document.getElementById('view-settings')
     };
     const headerTitle = document.getElementById('header-title');
     const backBtn = document.getElementById('back-btn');
-
+ 
     let currentTab = null;
     let probeData = null;
     let rawError = "None";
-
+ 
     // --- View Navigation Logic with Animations ---
     const navigateTo = (viewName, titleStr) => {
         const currentActive = Object.values(views).find(v => v.classList.contains('active'));
@@ -77,22 +75,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 currentActive.classList.remove('anim-exit');
             }, 250);
         }
-
+ 
         views[viewName].classList.add('anim-enter');
         views[viewName].classList.add('active');
         setTimeout(() => {
             views[viewName].classList.remove('anim-enter');
         }, 250);
-
+ 
         headerTitle.textContent = titleStr;
         backBtn.style.display = viewName === 'home' ? 'none' : 'block';
     };
-
+ 
     const settingsCard = document.getElementById('nav-settings');
-    const debugCard = document.getElementById('nav-debug');
-
+ 
     makeKeyboardInteractive(settingsCard, () => navigateTo('settings', 'Home > Settings'));
-    makeKeyboardInteractive(debugCard, () => navigateTo('debug', 'Home > Debug'));
     
     // Hovering or clicking/pressing returns home seamlessly
     backBtn.addEventListener('mouseenter', () => navigateTo('home', 'Home'));
@@ -117,9 +113,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const adj = adjCheck.checked ? "Adj On" : "Adj Off";
         settingsPreview.textContent = `${dir} • ${pad}% Pad • ${adj}`;
         
-        debugPreview.textContent = debugCheck.checked ? "Status: Enabled (Telemetry On)" : "Status: Disabled";
         debugContent.style.display = debugCheck.checked ? 'block' : 'none';
-        debugPreview.style.color = debugCheck.checked ? "var(--color-success)" : "#888";
+        
+        // Dynamic accordion height adjustment to prevent clipping
+        const advContent = document.getElementById('adv-settings-content');
+        if (advContent && advContent.classList.contains('expanded')) {
+            advContent.style.maxHeight = advContent.scrollHeight + 'px';
+        }
     };
 
     initCustomToggle(adjCheck, updatePreviews);
@@ -128,6 +128,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Attach listeners to update previews live
     dirSelect.addEventListener('change', updatePreviews);
     padSelect.addEventListener('change', updatePreviews);
+
+    // --- Advanced Settings Accordion Logic ---
+    const advToggle = document.getElementById('adv-settings-toggle');
+    const advContent = document.getElementById('adv-settings-content');
+    const advChevron = document.getElementById('adv-chevron');
+
+    if (advToggle && advContent) {
+        makeKeyboardInteractive(advToggle, () => {
+            const isExpanded = advContent.classList.contains('expanded');
+            if (isExpanded) {
+                advContent.classList.remove('expanded');
+                advContent.style.maxHeight = '0px';
+                advChevron.classList.remove('expanded');
+            } else {
+                advContent.classList.add('expanded');
+                advContent.style.maxHeight = advContent.scrollHeight + 'px';
+                advChevron.classList.add('expanded');
+            }
+        });
+    }
 
     // --- Tab Connection & Probe Logic ---
     try {
@@ -240,10 +260,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     debugDumpBtn.addEventListener('click', () => {
-        debugTextArea.select();
-        document.execCommand('copy');
-        debugDumpBtn.textContent = "Copied!";
-        setTimeout(() => debugDumpBtn.textContent = "Copy DD Report", 2000);
+        navigator.clipboard.writeText(debugTextArea.value).then(() => {
+            debugDumpBtn.textContent = "Copied!";
+            setTimeout(() => debugDumpBtn.textContent = "Copy DD Report", 2000);
+        }).catch((err) => {
+            debugDumpBtn.textContent = "Copy Failed";
+            console.error("Clipboard write failed:", err);
+            setTimeout(() => debugDumpBtn.textContent = "Copy DD Report", 2000);
+        });
     });
 
     startBtn.addEventListener('click', () => {
@@ -256,6 +280,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 showAdjacent: adjCheck.checked,
                 debug: debugCheck.checked
             }
+        }).catch(() => {
+            // Ignore error if context invalidated
         });
         window.close();
     });

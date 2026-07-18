@@ -376,6 +376,42 @@
             resize: none;
             box-sizing: border-box;
         }
+
+        /* Accordion Styling */
+        .accordion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--space-3) 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            margin-top: var(--space-4);
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: var(--font-size-base);
+            font-weight: 500;
+            transition: color var(--transition-fast);
+            outline: none;
+        }
+        .accordion-header:hover, .accordion-header:focus-visible {
+            color: var(--text-primary);
+        }
+        .accordion-header .chevron {
+            width: 16px;
+            height: 16px;
+            transition: transform var(--transition-normal);
+            color: var(--text-secondary);
+        }
+        .accordion-header:hover .chevron, .accordion-header:focus-visible .chevron {
+            color: var(--text-primary);
+        }
+        .accordion-header .chevron.expanded {
+            transform: rotate(180deg);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
     </style>
 </head>
 <body>
@@ -403,14 +439,6 @@
                 <div class="menu-card-left">
                     <span class="menu-title">Settings</span>
                     <span class="menu-preview" id="settings-preview">Manga • 5% Pad • Adj On</span>
-                </div>
-                <span class="menu-arrow">&gt;</span>
-            </div>
-
-            <div class="menu-card" id="nav-debug" role="button" tabindex="0">
-                <div class="menu-card-left">
-                    <span class="menu-title">Debug & Telemetry</span>
-                    <span class="menu-preview" id="debug-preview">Status: Disabled</span>
                 </div>
                 <span class="menu-arrow">&gt;</span>
             </div>
@@ -444,24 +472,29 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- DEBUG VIEW -->
-        <div id="view-debug" class="view">
-            <div class="control-group" style="margin-bottom: 16px;">
-                <div class="setting-row" style="background: var(--bg-surface); padding: 12px; border-radius: var(--radius-md); border: var(--glass-border);">
-                    <div class="setting-label-block">
-                        <strong style="color: var(--text-primary); font-size: var(--font-size-base);">Enable Debug Mode</strong>
-                    </div>
-                    <div class="toggle-switch" id="debug-mode" tabindex="0" role="checkbox" aria-checked="false">
-                        <div class="toggle-thumb"></div>
+            
+            <div class="accordion-header" id="adv-settings-toggle" role="button" tabindex="0">
+                <span>Advanced Settings</span>
+                <svg class="chevron" id="adv-chevron" viewBox="0 0 24 24" style="width: 18px; height: 18px; fill: currentColor; display: block;">
+                    <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
+                </svg>
+            </div>
+            <div class="accordion-content" id="adv-settings-content">
+                <div class="control-group" style="margin-top: 16px;">
+                    <div class="setting-row" style="background: var(--bg-surface); padding: 12px; border-radius: var(--radius-md); border: var(--glass-border);">
+                        <div class="setting-label-block">
+                            <strong style="color: var(--text-primary); font-size: var(--font-size-base);">Enable Debug Mode</strong>
+                        </div>
+                        <div class="toggle-switch" id="debug-mode" tabindex="0" role="checkbox" aria-checked="false">
+                            <div class="toggle-thumb"></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div id="debug-content" style="display: none;">
-                <label style="color: var(--color-error); font-weight: bold; font-size: 12px; margin-bottom: 4px; display: block;">Debug Dump (DD)</label>
-                <textarea id="debug-dump" class="dd-report" readonly></textarea>
-                <button id="copy-debug" class="action-btn" style="background: #4b5563; margin-top: 8px;">Copy DD Report</button>
+                <div id="debug-content" style="display: none; margin-top: 12px;">
+                    <label style="color: var(--color-error); font-weight: bold; font-size: 12px; margin-bottom: 4px; display: block;">Debug Dump (DD)</label>
+                    <textarea id="debug-dump" class="dd-report" readonly></textarea>
+                    <button id="copy-debug" class="action-btn" style="background: #4b5563; margin-top: 8px;">Copy DD Report</button>
+                </div>
             </div>
         </div>
     </div>
