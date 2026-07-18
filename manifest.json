@@ -4,21 +4,21 @@
 "version": "1.0",
 "description": "Guided panel view for long-strip manga readers by PanPan.",
 "action": {
-"default_popup": "popup.html"
+"default_popup": "popupui.html"
 },
 "permissions": [
 "activeTab",
 "scripting"
 ],
 "host_permissions": [
-"https://kagane.to/",
-"https://.kagane.to/"
+"https://kagane.to/*",
+"https://*.kagane.to/*"
 ],
 "content_scripts": [
 {
 "matches": [
-"https://kagane.to/",
-"https://.kagane.to/"
+"https://kagane.to/*",
+"https://*.kagane.to/*"
 ],
 "js": ["content.js"]
 }
