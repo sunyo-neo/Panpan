@@ -253,16 +253,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         // Hydrate UI from existing settings
+        let settingsToUse = null;
         if (probeData && probeData.currentSettings) {
-            dirSelect.value = probeData.currentSettings.direction || "manga";
-            padSelect.value = probeData.currentSettings.padding !== undefined ? probeData.currentSettings.padding : 5;
-            adjCheck.checked = probeData.currentSettings.showAdjacent !== false;
-            debugCheck.checked = probeData.currentSettings.debug === true;
-            if (hybridToggle) {
-                hybridToggle.checked = probeData.currentSettings.hybridMode === true;
-            }
-            setZoomValue(probeData.currentSettings.zoomMode || 'dynamic');
+            settingsToUse = probeData.currentSettings;
         } else {
+            const data = await chrome.storage.local.get('savedSettings');
+            if (data && data.savedSettings) {
+                settingsToUse = data.savedSettings;
+            }
+        }
+
+        if (settingsToUse) {
+            dirSelect.value = settingsToUse.direction || "manga";
+            padSelect.value = settingsToUse.padding !== undefined ? settingsToUse.padding : 5;
+            adjCheck.checked = settingsToUse.showAdjacent !== false;
+            debugCheck.checked = settingsToUse.debug === true;
+            if (hybridToggle) {
+                hybridToggle.checked = settingsToUse.hybridMode === true;
+            }
+            setZoomValue(settingsToUse.zoomMode || 'dynamic');
+        } else {
+            dirSelect.value = "manga";
+            padSelect.value = 5;
+            adjCheck.checked = true;
+            debugCheck.checked = false;
+            if (hybridToggle) {
+                hybridToggle.checked = false;
+            }
             setZoomValue('dynamic');
         }
         updatePreviews(); // Generate initial strings
@@ -320,16 +337,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     startBtn.addEventListener('click', () => {
         if (!currentTab) return;
+        const settings = {
+            direction: dirSelect.value,
+            padding: parseInt(padSelect.value),
+            showAdjacent: adjCheck.checked,
+            debug: debugCheck.checked,
+            hybridMode: hybridToggle ? hybridToggle.checked : false,
+            zoomMode: activeZoomValue
+        };
+        chrome.storage.local.set({ savedSettings: settings });
         chrome.tabs.sendMessage(currentTab.id, {
             action: "START_VIEWER",
-            settings: {
-                direction: dirSelect.value,
-                padding: parseInt(padSelect.value),
-                showAdjacent: adjCheck.checked,
-                debug: debugCheck.checked,
-                hybridMode: hybridToggle ? hybridToggle.checked : false,
-                zoomMode: activeZoomValue
-            }
+            settings: settings
         }).catch(() => {
             // Ignore error if context invalidated
         });
