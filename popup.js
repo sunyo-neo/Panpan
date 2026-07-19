@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const padSelect = document.getElementById('padding');
     const adjCheck = document.getElementById('show-adjacent');
     const debugCheck = document.getElementById('debug-mode');
+    const hybridToggle = document.getElementById('hybrid-mode-toggle');
     
     // Define checked property on custom div toggles and handle interaction events
     const initCustomToggle = (el, onChange) => {
@@ -110,13 +111,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         const dir = dirSelect.options[dirSelect.selectedIndex].text.split(' ')[0]; // Gets "Manga" or "Comic"
         const pad = padSelect.value;
         const adj = adjCheck.checked ? "Adj On" : "Adj Off";
-        settingsPreview.textContent = `${dir} • ${pad}% Pad • ${adj}`;
+        let previewStr = `${dir} • ${pad}% Pad • ${adj}`;
+        if (hybridToggle && hybridToggle.checked) {
+            previewStr += " • Hybrid";
+        }
+        settingsPreview.textContent = previewStr;
         
         debugContent.style.display = debugCheck.checked ? 'block' : 'none';
     };
 
     initCustomToggle(adjCheck, updatePreviews);
     initCustomToggle(debugCheck, updatePreviews);
+    initCustomToggle(hybridToggle, updatePreviews);
 
     // Attach listeners to update previews live
     dirSelect.addEventListener('change', updatePreviews);
@@ -207,6 +213,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             padSelect.value = probeData.currentSettings.padding !== undefined ? probeData.currentSettings.padding : 5;
             adjCheck.checked = probeData.currentSettings.showAdjacent !== false;
             debugCheck.checked = probeData.currentSettings.debug === true;
+            if (hybridToggle) {
+                hybridToggle.checked = probeData.currentSettings.hybridMode === true;
+            }
         }
         updatePreviews(); // Generate initial strings
 
@@ -269,7 +278,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 direction: dirSelect.value,
                 padding: parseInt(padSelect.value),
                 showAdjacent: adjCheck.checked,
-                debug: debugCheck.checked
+                debug: debugCheck.checked,
+                hybridMode: hybridToggle ? hybridToggle.checked : false
             }
         }).catch(() => {
             // Ignore error if context invalidated

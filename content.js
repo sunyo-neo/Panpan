@@ -6,7 +6,7 @@ if (typeof window.panelZoomInjected === 'undefined') {
     let globalPanels = [];
     let currentPanelIndex = 0;
     let overlayHost = null;
-    let viewerSettings = { padding: 5, showAdjacent: true, direction: "manga", debug: false };
+    let viewerSettings = { padding: 5, showAdjacent: true, direction: "manga", debug: false, hybridMode: false };
     let isProcessingBackground = false;
     let isFullPageMode = false;
     
@@ -544,8 +544,12 @@ if (typeof window.panelZoomInjected === 'undefined') {
                     overflow: ${showAdj ? 'visible' : 'hidden'};
                     box-shadow: ${showAdj ? 'none' : '0 10px 40px rgba(0,0,0,0.8)'};
                     visibility: hidden;
-                    transition: transform 0.3s ease-out, width 0.3s ease-out, height 0.3s ease-out;
+                    transition: transform 0.3s ease, box-shadow 0.3s ease, width 0.3s ease-out, height 0.3s ease-out;
                     will-change: transform, width, height;
+                }
+                .image-wrapper.is-buffer-mode {
+                    transform: scale(0.95);
+                    box-shadow: 0 0 40px rgba(139, 92, 246, 0.3);
                 }
                 .manga-image {
                     position: absolute;
@@ -714,6 +718,27 @@ if (typeof window.panelZoomInjected === 'undefined') {
                     opacity: 0;
                     visibility: hidden;
                 }
+                
+                .hybrid-legend {
+                    position: fixed;
+                    bottom: 24px;
+                    right: 24px;
+                    background: var(--bg-surface);
+                    backdrop-filter: blur(12px);
+                    -webkit-backdrop-filter: blur(12px);
+                    border: var(--glass-border);
+                    padding: 8px 16px;
+                    border-radius: var(--radius-pill);
+                    color: var(--text-secondary);
+                    font-size: var(--font-size-sm);
+                    font-family: var(--font-family);
+                    pointer-events: none;
+                    z-index: 30;
+                    box-shadow: var(--shadow-ambient);
+                    transition: opacity var(--transition-fast), visibility var(--transition-fast);
+                    opacity: 0;
+                    visibility: hidden;
+                }
             </style>
             <div class="viewer-container">
                 <div class="top-bar">
@@ -736,6 +761,7 @@ if (typeof window.panelZoomInjected === 'undefined') {
                 <div class="nav-zone nav-right" id="zone-next"></div>
                 <div class="image-wrapper" id="pz-wrapper"><img id="main-display" class="manga-image" src="" draggable="false"></div>
                 <div class="helper-text" id="helper-txt">Double-click a panel to zoom in!</div>
+                <div class="hybrid-legend" id="pz-hybrid-legend">[↓] Dive into panels | [←] [→] Change Page</div>
             </div>
         `;
         document.body.appendChild(overlayHost);
@@ -781,15 +807,31 @@ if (typeof window.panelZoomInjected === 'undefined') {
                 const existingDebugs = shadow.querySelectorAll('.pz-debug-box');
                 existingDebugs.forEach(el => el.remove());
 
+                const hybridLegend = shadow.getElementById('pz-hybrid-legend');
+
                 if (isFullPageMode) {
-                    helperTxt.textContent = "Double-click a panel to zoom in!";
-                    helperTxt.style.opacity = '1';
-                    helperTxt.style.visibility = 'visible';
-                    if (helperTimeout) clearTimeout(helperTimeout);
-                    helperTimeout = setTimeout(() => {
-                        helperTxt.style.opacity = '0';
-                        helperTxt.style.visibility = 'hidden';
-                    }, 3500);
+                    if (viewerSettings.hybridMode) {
+                        wrapperEl.classList.add('is-buffer-mode');
+                        if (hybridLegend) {
+                            hybridLegend.style.opacity = '1';
+                            hybridLegend.style.visibility = 'visible';
+                        }
+                    } else {
+                        wrapperEl.classList.remove('is-buffer-mode');
+                        if (hybridLegend) {
+                            hybridLegend.style.opacity = '0';
+                            hybridLegend.style.visibility = 'hidden';
+                        }
+                        
+                        helperTxt.textContent = "Double-click a panel to zoom in!";
+                        helperTxt.style.opacity = '1';
+                        helperTxt.style.visibility = 'visible';
+                        if (helperTimeout) clearTimeout(helperTimeout);
+                        helperTimeout = setTimeout(() => {
+                            helperTxt.style.opacity = '0';
+                            helperTxt.style.visibility = 'hidden';
+                        }, 3500);
+                    }
                     const scale = Math.min((viewW * 0.95) / p.ow, (viewH * 0.95) / p.oh);
                     wrapperEl.style.width = (p.ow * scale) + 'px'; 
                     wrapperEl.style.height = (p.oh * scale) + 'px';
@@ -831,6 +873,12 @@ if (typeof window.panelZoomInjected === 'undefined') {
                         }
                     }
                 } else {
+                    wrapperEl.classList.remove('is-buffer-mode');
+                    if (hybridLegend) {
+                        hybridLegend.style.opacity = '0';
+                        hybridLegend.style.visibility = 'hidden';
+                    }
+
                     helperTxt.style.opacity = '0';
                     helperTxt.style.visibility = 'hidden';
                     if (helperTimeout) clearTimeout(helperTimeout);
@@ -916,10 +964,7 @@ if (typeof window.panelZoomInjected === 'undefined') {
                 return;
             }
             if (isFullPageMode) {
-                const currentUrl = globalPanels[currentPanelIndex].url;
-                let nextIndex = currentPanelIndex;
-                while (nextIndex < globalPanels.length && globalPanels[nextIndex].url === currentUrl) nextIndex++;
-                if (nextIndex < globalPanels.length) { currentPanelIndex = nextIndex; renderCurrent(); }
+                goNextPage();
             } else {
                 if (currentPanelIndex < globalPanels.length - 1) { currentPanelIndex++; renderCurrent(); }
             }
@@ -931,17 +976,77 @@ if (typeof window.panelZoomInjected === 'undefined') {
                 return;
             }
             if (isFullPageMode) {
-                const currentUrl = globalPanels[currentPanelIndex].url;
-                let prevIndex = currentPanelIndex;
-                while (prevIndex > 0 && globalPanels[prevIndex].url === currentUrl) prevIndex--;
-                if (prevIndex > 0) {
-                    const prevUrl = globalPanels[prevIndex].url;
-                    while (prevIndex > 0 && globalPanels[prevIndex - 1].url === prevUrl) prevIndex--;
-                    currentPanelIndex = prevIndex;
-                    renderCurrent();
-                }
+                goPrevPage();
             } else {
                 if (currentPanelIndex > 0) { currentPanelIndex--; renderCurrent(); } 
+            }
+        };
+
+        const goNextPage = () => {
+            if (isNavigating) { pzPerf.lockBlockCount++; return; }
+            const currentUrl = globalPanels[currentPanelIndex].url;
+            let nextIndex = currentPanelIndex;
+            while (nextIndex < globalPanels.length && globalPanels[nextIndex].url === currentUrl) nextIndex++;
+            if (nextIndex < globalPanels.length) {
+                currentPanelIndex = nextIndex;
+                isFullPageMode = true;  // Always land in buffer state
+                renderCurrent();
+            }
+        };
+
+        const goPrevPage = () => {
+            if (isNavigating) { pzPerf.lockBlockCount++; return; }
+            const currentUrl = globalPanels[currentPanelIndex].url;
+            let prevIndex = currentPanelIndex;
+            while (prevIndex > 0 && globalPanels[prevIndex].url === currentUrl) prevIndex--;
+            if (prevIndex >= 0) {
+                const prevUrl = globalPanels[prevIndex].url;
+                while (prevIndex > 0 && globalPanels[prevIndex - 1].url === prevUrl) prevIndex--;
+                currentPanelIndex = prevIndex;
+                isFullPageMode = true;  // Always land in buffer state
+                renderCurrent();
+            }
+        };
+
+        const goNextPanel = () => {
+            if (isNavigating) { pzPerf.lockBlockCount++; return; }
+            if (isFullPageMode) {
+                // "Dive in" — enter panel mode at first panel of current page
+                isFullPageMode = false;
+                renderCurrent();
+            } else {
+                // Navigate to next panel
+                const currentUrl = globalPanels[currentPanelIndex].url;
+                if (currentPanelIndex < globalPanels.length - 1 && globalPanels[currentPanelIndex + 1].url === currentUrl) {
+                    // Next panel on same page
+                    currentPanelIndex++;
+                    renderCurrent();
+                } else {
+                    // Last panel on page — return to buffer showing next page
+                    if (viewerSettings.hybridMode) {
+                        goNextPage();
+                    } else {
+                        goNext(); // Legacy: just go to next panel/page
+                    }
+                }
+            }
+        };
+
+        const goPrevPanel = () => {
+            if (isNavigating) { pzPerf.lockBlockCount++; return; }
+            if (isFullPageMode) return; // Already in buffer, Up does nothing (or could go to prev page buffer)
+            
+            const currentUrl = globalPanels[currentPanelIndex].url;
+            const panelsOnPage = globalPanels.filter(p => p.url === currentUrl);
+            const panelIdx = panelsOnPage.indexOf(globalPanels[currentPanelIndex]);
+            
+            if (panelIdx > 0) {
+                currentPanelIndex--;
+                renderCurrent();
+            } else {
+                // First panel on page — Up returns to buffer for current page
+                isFullPageMode = true;
+                renderCurrent();
             }
         };
 
@@ -962,8 +1067,12 @@ if (typeof window.panelZoomInjected === 'undefined') {
             }
         };
 
-        shadow.getElementById('zone-next').addEventListener('click', goNext);
-        shadow.getElementById('zone-prev').addEventListener('click', goPrev);
+        shadow.getElementById('zone-next').addEventListener('click', () => {
+            viewerSettings.hybridMode ? goNextPage() : goNext();
+        });
+        shadow.getElementById('zone-prev').addEventListener('click', () => {
+            viewerSettings.hybridMode ? goPrevPage() : goPrev();
+        });
         shadow.getElementById('close-viewer').addEventListener('click', closeViewer);
         shadow.getElementById('copy-telemetry-btn').addEventListener('click', dumpTelemetry);
         
@@ -1001,6 +1110,12 @@ if (typeof window.panelZoomInjected === 'undefined') {
                         return;
                     }
                 }
+                
+                // If hybrid mode is enabled, clicking anywhere in the buffer state 
+                // outside a specific panel will still dive into the first panel.
+                if (viewerSettings.hybridMode) {
+                    goNextPanel();
+                }
             } else {
                 // If in panel view, double click in center toggles full page mode
                 isFullPageMode = true;
@@ -1009,15 +1124,34 @@ if (typeof window.panelZoomInjected === 'undefined') {
         });
 
         const handleKeydown = (e) => {
-            if (e.key === 'ArrowRight' || e.key === 'd') goNext();
-            if (e.key === 'ArrowLeft' || e.key === 'a') goPrev();
-            if (e.key === 'p' || e.key === 'P') { 
+            if (viewerSettings.hybridMode) {
+                if (isFullPageMode) {
+                    // Buffer Mode (Macro): Left/Right = Pages, Down = Dive in
+                    if (e.key === 'ArrowRight' || e.key === 'd') goNextPage();
+                    if (e.key === 'ArrowLeft' || e.key === 'a') goPrevPage();
+                    if (e.key === 'ArrowDown' || e.key === 's') goNextPanel();
+                } else {
+                    // Panel Mode (Micro): Left/Right = Panels, Up = Zoom out
+                    if (e.key === 'ArrowRight' || e.key === 'd') goNextPanel();
+                    if (e.key === 'ArrowLeft' || e.key === 'a') goPrevPanel();
+                    if (e.key === 'ArrowUp' || e.key === 'w') {
+                        if (isNavigating) return;
+                        isFullPageMode = true;
+                        renderCurrent();
+                    }
+                }
+            } else {
+                // Legacy: Left/Right = next/prev (panel or page depending on mode)
+                if (e.key === 'ArrowRight' || e.key === 'd') goNext();
+                if (e.key === 'ArrowLeft' || e.key === 'a') goPrev();
+            }
+            if (e.key === 'p' || e.key === 'P') {
                 if (isNavigating) return;
-                isFullPageMode = !isFullPageMode; 
-                renderCurrent(); 
+                isFullPageMode = !isFullPageMode;
+                renderCurrent();
             }
             if (e.key === 'Escape') closeViewer();
-            if ((e.key === 't' || e.key === 'T') && viewerSettings.debug) dumpTelemetry(); 
+            if ((e.key === 't' || e.key === 'T') && viewerSettings.debug) dumpTelemetry();
         };
         
         function dumpTelemetry() {
@@ -1053,6 +1187,11 @@ if (typeof window.panelZoomInjected === 'undefined') {
         }
 
         document.addEventListener('keydown', handleKeydown);
+        
+        if (viewerSettings.hybridMode) {
+            isFullPageMode = true;
+        }
+        
         renderCurrent();
     }
 }
