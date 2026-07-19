@@ -739,6 +739,23 @@ if (typeof window.panelZoomInjected === 'undefined') {
                     opacity: 0;
                     visibility: hidden;
                 }
+                
+                .hud-hidden .top-bar {
+                    opacity: 0 !important;
+                    pointer-events: none !important;
+                    transform: translateX(-50%) translateY(-20px) !important;
+                    visibility: hidden !important;
+                }
+                .hud-hidden .hybrid-legend {
+                    opacity: 0 !important;
+                    pointer-events: none !important;
+                    visibility: hidden !important;
+                }
+                .hud-hidden .helper-text {
+                    opacity: 0 !important;
+                    pointer-events: none !important;
+                    visibility: hidden !important;
+                }
             </style>
             <div class="viewer-container">
                 <div class="top-bar">
@@ -1083,11 +1100,33 @@ if (typeof window.panelZoomInjected === 'undefined') {
         });
 
         const container = shadow.querySelector('.viewer-container');
+
+        let clickTimer = null;
+        const toggleHUD = () => {
+            container.classList.toggle('hud-hidden');
+        };
+
+        container.addEventListener('click', (e) => {
+            if (e.target.closest('.nav-zone') || e.target.closest('.top-bar') || e.target.closest('.hybrid-legend')) return;
+            if (isNavigating) return;
+
+            if (clickTimer) clearTimeout(clickTimer);
+            clickTimer = setTimeout(() => {
+                toggleHUD();
+                clickTimer = null;
+            }, 250);
+        });
+
         container.addEventListener('dblclick', (e) => {
             // Ignore double clicks if they happened on the navigation zones or top bar.
             // This prevents accidental full-page toggles when fast-clicking.
             if (e.target.closest('.nav-zone') || e.target.closest('.top-bar')) return;
             if (isNavigating) return;
+
+            if (clickTimer) {
+                clearTimeout(clickTimer);
+                clickTimer = null;
+            }
 
             if (isFullPageMode) {
                 // Determine which exact panel the user is hovering over to zoom into
