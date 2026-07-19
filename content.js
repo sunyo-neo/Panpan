@@ -11,7 +11,14 @@ if (typeof window.panelZoomInjected === 'undefined') {
     let isFullPageMode = false;
     
     let pzViewerSettings = viewerSettings;
-    let pzPerf = { totalSlicingTime: 0, pagesProcessed: 0, lastRenderTime: 0, memEstimate: "N/A" };
+    let pzPerf = { 
+        totalSlicingTime: 0, pagesProcessed: 0, lastRenderTime: 0, memEstimate: "N/A",
+        crossPageNavCount: 0, crossPageNavTotalMs: 0,
+        samePageNavCount: 0, samePageNavTotalMs: 0,
+        staleLoadCallbacks: 0,
+        lockBlockCount: 0, lockTimeoutCount: 0,
+        droppedFrames: 0
+    };
     let pzTelemetry = {}; // Stores raw coordinate data for debugging
     let pzPageData = {};  // Caches raw extracted boxes for quick re-sorting
 
@@ -741,6 +748,11 @@ if (typeof window.panelZoomInjected === 'undefined') {
         let currentLoadedUrl = "";
         let helperTimeout = null;
         
+        // Navigation lock to prevent overlapping source swaps (e.g. from rapid key presses).
+        // It's set to true during a cross-page load, and released after the new image
+        // has loaded, layout is painted via rAF, or a 500ms safety timeout expires.
+        let isNavigating = false;
+        
         const renderCurrent = () => {
             const renderStart = performance.now();
             if (currentPanelIndex >= globalPanels.length) return;
@@ -842,25 +854,67 @@ if (typeof window.panelZoomInjected === 'undefined') {
 
             if (currentLoadedUrl !== p.url) {
                 currentLoadedUrl = p.url;
+                pzPerf.crossPageNavCount++;
+                
+                isNavigating = true;
+                
+                // H1 Fix: Disable transitions during source swap
+                mainImg.style.transition = 'none';
+                wrapperEl.style.transition = 'none';
                 mainImg.style.opacity = '0.5';
                 
                 const handleLoad = () => {
                     if (mainImg.src === p.url) {
+                        pzPerf.crossPageNavTotalMs += (performance.now() - renderStart);
                         applyCoordinates();
-                        mainImg.style.opacity = '1';
-                        wrapperEl.style.visibility = 'visible';
+                        // H3 Fix: Ensure layout is computed before revealing
+                        requestAnimationFrame(() => {
+                            mainImg.style.opacity = '1';
+                            wrapperEl.style.visibility = 'visible';
+                            // H1 Fix: Re-enable transitions after coordinates painted
+                            requestAnimationFrame(() => {
+                                mainImg.style.transition = '';
+                                wrapperEl.style.transition = '';
+                                isNavigating = false;
+                            });
+                        });
+                    } else {
+                        pzPerf.staleLoadCallbacks++;
                     }
                 };
                 
                 mainImg.onload = handleLoad;
                 mainImg.onerror = handleLoad;
                 mainImg.src = p.url;
+                
+                // Safety timeout: prevent permanent lock if load event never fires
+                setTimeout(() => { 
+                    if (isNavigating) {
+                        isNavigating = false;
+                        pzPerf.lockTimeoutCount++;
+                    }
+                }, 500);
+
+                // Frame monitor
+                let lastFrame = performance.now();
+                const frameMonitor = (ts) => {
+                    if (ts - lastFrame > 50) pzPerf.droppedFrames++;
+                    lastFrame = ts;
+                    if (isNavigating) requestAnimationFrame(frameMonitor);
+                };
+                requestAnimationFrame(frameMonitor);
             } else {
+                pzPerf.samePageNavCount++;
                 applyCoordinates();
+                pzPerf.samePageNavTotalMs += (performance.now() - renderStart);
             }
         };
 
         const goNext = () => {
+            if (isNavigating) {
+                pzPerf.lockBlockCount++;
+                return;
+            }
             if (isFullPageMode) {
                 const currentUrl = globalPanels[currentPanelIndex].url;
                 let nextIndex = currentPanelIndex;
@@ -872,6 +926,10 @@ if (typeof window.panelZoomInjected === 'undefined') {
         };
 
         const goPrev = () => { 
+            if (isNavigating) {
+                pzPerf.lockBlockCount++;
+                return;
+            }
             if (isFullPageMode) {
                 const currentUrl = globalPanels[currentPanelIndex].url;
                 let prevIndex = currentPanelIndex;
@@ -910,6 +968,7 @@ if (typeof window.panelZoomInjected === 'undefined') {
         shadow.getElementById('copy-telemetry-btn').addEventListener('click', dumpTelemetry);
         
         shadow.getElementById('toggle-full-page').addEventListener('click', () => {
+            if (isNavigating) return;
             isFullPageMode = !isFullPageMode;
             renderCurrent();
         });
@@ -919,6 +978,7 @@ if (typeof window.panelZoomInjected === 'undefined') {
             // Ignore double clicks if they happened on the navigation zones or top bar.
             // This prevents accidental full-page toggles when fast-clicking.
             if (e.target.closest('.nav-zone') || e.target.closest('.top-bar')) return;
+            if (isNavigating) return;
 
             if (isFullPageMode) {
                 // Determine which exact panel the user is hovering over to zoom into
@@ -951,7 +1011,11 @@ if (typeof window.panelZoomInjected === 'undefined') {
         const handleKeydown = (e) => {
             if (e.key === 'ArrowRight' || e.key === 'd') goNext();
             if (e.key === 'ArrowLeft' || e.key === 'a') goPrev();
-            if (e.key === 'p' || e.key === 'P') { isFullPageMode = !isFullPageMode; renderCurrent(); }
+            if (e.key === 'p' || e.key === 'P') { 
+                if (isNavigating) return;
+                isFullPageMode = !isFullPageMode; 
+                renderCurrent(); 
+            }
             if (e.key === 'Escape') closeViewer();
             if ((e.key === 't' || e.key === 'T') && viewerSettings.debug) dumpTelemetry(); 
         };
