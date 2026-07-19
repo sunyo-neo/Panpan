@@ -6,7 +6,7 @@ if (typeof window.panelZoomInjected === 'undefined') {
     let globalPanels = [];
     let currentPanelIndex = 0;
     let overlayHost = null;
-    let viewerSettings = { padding: 5, showAdjacent: true, direction: "manga", debug: false, hybridMode: false };
+    let viewerSettings = { padding: 5, showAdjacent: true, direction: "manga", debug: false, hybridMode: false, zoomMode: "dynamic" };
     let isProcessingBackground = false;
     let isFullPageMode = false;
     
@@ -104,6 +104,9 @@ if (typeof window.panelZoomInjected === 'undefined') {
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.action === "START_VIEWER") {
             viewerSettings = request.settings;
+            if (!viewerSettings.zoomMode) {
+                viewerSettings.zoomMode = 'dynamic';
+            }
             pzViewerSettings = viewerSettings;
             
             if (overlayHost) {
@@ -905,7 +908,14 @@ if (typeof window.panelZoomInjected === 'undefined') {
                     const targetW = viewW * (1 - margin);
                     const targetH = viewH * (1 - margin);
 
-                    const scale = Math.min(targetW / p.sw, targetH / p.sh);
+                    let scale = Math.min(targetW / p.sw, targetH / p.sh);
+                    const zoomMode = viewerSettings.zoomMode || 'dynamic';
+                    if (zoomMode === 'dynamic') {
+                        const maxRatio = Math.max(p.sw / p.ow, p.sh / p.oh);
+                        scale = scale * Math.sqrt(maxRatio);
+                    } else if (zoomMode === 'page-scale') {
+                        scale = Math.min(targetW / p.ow, targetH / p.oh);
+                    }
                     
                     wrapperEl.style.width = (p.sw * scale) + 'px'; 
                     wrapperEl.style.height = (p.sh * scale) + 'px';
@@ -1188,6 +1198,37 @@ if (typeof window.panelZoomInjected === 'undefined') {
                 if (isNavigating) return;
                 isFullPageMode = !isFullPageMode;
                 renderCurrent();
+            }
+            if (e.key === 'z' || e.key === 'Z') {
+                if (isNavigating) return;
+                const modes = ['dynamic', 'page-scale', 'fill-canvas'];
+                const currentMode = viewerSettings.zoomMode || 'dynamic';
+                let nextIdx = (modes.indexOf(currentMode) + 1) % modes.length;
+                viewerSettings.zoomMode = modes[nextIdx];
+                renderCurrent();
+                
+                const prettyNames = {
+                    'dynamic': 'Dynamic',
+                    'page-scale': 'Page Scale',
+                    'fill-canvas': 'Fill Canvas'
+                };
+                helperTxt.textContent = `Zoom Mode: ${prettyNames[viewerSettings.zoomMode]}`;
+                helperTxt.style.opacity = '1';
+                helperTxt.style.visibility = 'visible';
+                if (helperTimeout) clearTimeout(helperTimeout);
+                helperTimeout = setTimeout(() => {
+                    if (isFullPageMode) {
+                        if (!viewerSettings.hybridMode) {
+                            helperTxt.textContent = "Double-click a panel to zoom in!";
+                        } else {
+                            helperTxt.textContent = "";
+                        }
+                    } else {
+                        helperTxt.textContent = "";
+                    }
+                    helperTxt.style.opacity = '0';
+                    helperTxt.style.visibility = 'hidden';
+                }, 2500);
             }
             if (e.key === 'Escape') closeViewer();
             if ((e.key === 't' || e.key === 'T') && viewerSettings.debug) dumpTelemetry();

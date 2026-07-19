@@ -12,6 +12,43 @@ document.addEventListener('DOMContentLoaded', async () => {
     const debugCheck = document.getElementById('debug-mode');
     const hybridToggle = document.getElementById('hybrid-mode-toggle');
     
+    // Zoom Mode Segmented Control
+    const zoomGroup = document.getElementById('zoom-mode-group');
+    const zoomButtons = Array.from(zoomGroup.querySelectorAll('.segment-btn'));
+    let activeZoomValue = 'dynamic';
+
+    const setZoomValue = (value) => {
+        activeZoomValue = value;
+        zoomButtons.forEach(btn => {
+            const isActive = btn.getAttribute('data-value') === value;
+            btn.classList.toggle('active', isActive);
+            btn.setAttribute('aria-checked', isActive ? 'true' : 'false');
+            btn.setAttribute('tabindex', isActive ? '0' : '-1');
+        });
+        updatePreviews();
+    };
+
+    zoomButtons.forEach((btn, idx) => {
+        btn.addEventListener('click', () => {
+            setZoomValue(btn.getAttribute('data-value'));
+        });
+
+        btn.addEventListener('keydown', (e) => {
+            let targetIdx = -1;
+            if (e.key === 'ArrowRight') {
+                targetIdx = (idx + 1) % zoomButtons.length;
+            } else if (e.key === 'ArrowLeft') {
+                targetIdx = (idx - 1 + zoomButtons.length) % zoomButtons.length;
+            }
+
+            if (targetIdx !== -1) {
+                e.preventDefault();
+                zoomButtons[targetIdx].focus();
+                setZoomValue(zoomButtons[targetIdx].getAttribute('data-value'));
+            }
+        });
+    });
+    
     // Define checked property on custom div toggles and handle interaction events
     const initCustomToggle = (el, onChange) => {
         Object.defineProperty(el, 'checked', {
@@ -111,7 +148,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         const dir = dirSelect.options[dirSelect.selectedIndex].text.split(' ')[0]; // Gets "Manga" or "Comic"
         const pad = padSelect.value;
         const adj = adjCheck.checked ? "Adj On" : "Adj Off";
-        let previewStr = `${dir} • ${pad}% Pad • ${adj}`;
+        
+        const zoomPretty = {
+            'dynamic': 'Dynamic',
+            'page-scale': 'Page Scale',
+            'fill-canvas': 'Fill'
+        };
+        const zoomName = zoomPretty[activeZoomValue] || 'Dynamic';
+        
+        let previewStr = `${dir} • ${pad}% Pad • ${adj} • ${zoomName}`;
         if (hybridToggle && hybridToggle.checked) {
             previewStr += " • Hybrid";
         }
@@ -216,6 +261,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (hybridToggle) {
                 hybridToggle.checked = probeData.currentSettings.hybridMode === true;
             }
+            setZoomValue(probeData.currentSettings.zoomMode || 'dynamic');
+        } else {
+            setZoomValue('dynamic');
         }
         updatePreviews(); // Generate initial strings
 
@@ -279,7 +327,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 padding: parseInt(padSelect.value),
                 showAdjacent: adjCheck.checked,
                 debug: debugCheck.checked,
-                hybridMode: hybridToggle ? hybridToggle.checked : false
+                hybridMode: hybridToggle ? hybridToggle.checked : false,
+                zoomMode: activeZoomValue
             }
         }).catch(() => {
             // Ignore error if context invalidated
