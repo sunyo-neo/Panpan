@@ -544,9 +544,9 @@ if (typeof window.panelZoomInjected === 'undefined') {
                     position: absolute;
                     max-width: none !important;
                     max-height: none !important;
-                    will-change: transform, left, top, width, height;
+                    will-change: transform, left, top, width, height, opacity;
                     transform: translateZ(0);
-                    transition: transform 0.3s ease-out, left 0.3s ease-out, top 0.3s ease-out, width 0.3s ease-out, height 0.3s ease-out;
+                    transition: transform 0.3s ease-out, left 0.3s ease-out, top 0.3s ease-out, width 0.3s ease-out, height 0.3s ease-out, opacity 0.2s ease-out;
                 }
                 .nav-zone {
                     position: absolute;
@@ -841,12 +841,13 @@ if (typeof window.panelZoomInjected === 'undefined') {
             };
 
             if (currentLoadedUrl !== p.url) {
-                wrapperEl.style.visibility = 'hidden';
                 currentLoadedUrl = p.url;
+                mainImg.style.opacity = '0.5';
                 
                 const handleLoad = () => {
                     if (mainImg.src === p.url) {
                         applyCoordinates();
+                        mainImg.style.opacity = '1';
                         wrapperEl.style.visibility = 'visible';
                     }
                 };
