@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const titleEl = document.getElementById('manga-title');
     const chevronBtn = document.getElementById('title-chevron');
     const countEl = document.querySelector('#image-count span');
-    const startBtn = document.getElementById('start-btn');
+    const powerBtn = document.getElementById('power-btn');
     
     // Setting Elements
     const dirSelect = document.getElementById('reading-direction');
@@ -293,15 +293,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, 10);
 
             countEl.textContent = probeData.totalContainers + " Pages Detected";
-            startBtn.disabled = false;
             
-            if (probeData.isViewerActive) {
-                startBtn.textContent = "Apply Change";
-                startBtn.style.background = "linear-gradient(135deg, var(--color-warning) 0%, #d97706 100%)";
-            } else {
-                startBtn.textContent = "Launch Panel View";
-                startBtn.style.background = "var(--primary-gradient)";
-            }
+            chrome.storage.local.get('isPanpanEnabled', ({ isPanpanEnabled }) => {
+                if (isPanpanEnabled) {
+                    powerBtn.classList.remove('power-off');
+                    powerBtn.classList.add('power-on');
+                } else {
+                    powerBtn.classList.remove('power-on');
+                    powerBtn.classList.add('power-off');
+                }
+            });
         } else {
             titleEl.textContent = "Injection Blocked by Browser";
             titleEl.style.color = "#ef4444";
@@ -335,7 +336,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    startBtn.addEventListener('click', () => {
+    powerBtn.addEventListener('click', async () => {
         if (!currentTab) return;
         const settings = {
             direction: dirSelect.value,
@@ -345,13 +346,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             hybridMode: hybridToggle ? hybridToggle.checked : false,
             zoomMode: activeZoomValue
         };
-        chrome.storage.local.set({ savedSettings: settings });
-        chrome.tabs.sendMessage(currentTab.id, {
-            action: "START_VIEWER",
-            settings: settings
-        }).catch(() => {
-            // Ignore error if context invalidated
-        });
-        window.close();
+        await chrome.storage.local.set({ savedSettings: settings });
+        
+        const { isPanpanEnabled } = await chrome.storage.local.get('isPanpanEnabled');
+        const newState = !isPanpanEnabled;
+        await chrome.storage.local.set({ isPanpanEnabled: newState });
+        
+        if (newState) {
+            powerBtn.classList.remove('power-off');
+            powerBtn.classList.add('power-on');
+        } else {
+            powerBtn.classList.remove('power-on');
+            powerBtn.classList.add('power-off');
+        }
     });
 });
