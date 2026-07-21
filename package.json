@@ -1,6 +1,8 @@
 {
   "name": "panpan",
   "version": "1.0.0",
+  "os": ["darwin", "linux", "win32"],
+  "cpu": ["x64", "arm64"],
   "description": "",
   "main": "content.js",
   "directories": {
