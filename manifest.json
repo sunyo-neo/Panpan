@@ -31,7 +31,7 @@
 "https://kagane.to/*",
 "https://*.kagane.to/*"
 ],
-"js": ["content.js"]
+"js": ["dist/content.js"]
 }
 ],
 "browser_specific_settings": {

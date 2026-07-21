@@ -4,7 +4,9 @@ const state = {
     currentPanelIndex: 0,
     viewerSettings: {
         readingDirection: 'RTL',
-        mode: 'panel'
+        mode: 'panel',
+        padding: 0,
+        zoomMode: 'fit'
     }
 };
 

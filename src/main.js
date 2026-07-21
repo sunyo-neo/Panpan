@@ -10,11 +10,23 @@ if (typeof window.panelZoomInjected === 'undefined') {
 
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.action === "START_VIEWER") {
-            const settings = request.settings || {};
-            if (!settings.readingDirection) settings.readingDirection = 'manga';
-            
-            setViewerSettings(settings);
+            const payload = request.settings || {};
+            const mappedSettings = {
+                readingDirection: payload.direction || payload.readingDirection || 'RTL',
+                padding: payload.padding !== undefined ? payload.padding : 0,
+                zoomMode: payload.zoomMode || 'fit'
+            };
+            setViewerSettings(mappedSettings);
             runScanner();
+        } else if (request.action === 'GET_PROBE_DATA') {
+            const currentState = getState();
+            sendResponse({
+                status: 'active',
+                imagesFound: currentState.mangaImages.length,
+                panelsExtracted: currentState.globalPanels.length,
+                currentMode: currentState.viewerSettings.mode
+            });
+            return false; // Synchronous response
         }
         return true;
     });
