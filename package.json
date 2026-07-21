@@ -7,7 +7,7 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
     "build": "vite build"
   },
   "repository": {
@@ -24,7 +24,8 @@
   "homepage": "https://github.com/sunyo-neo/Panpan#readme",
   "devDependencies": {
     "@vitejs/plugin-react": "^6.0.3",
-    "vite": "^8.1.5"
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "detect-libc": "^2.1.2",
