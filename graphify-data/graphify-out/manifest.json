@@ -1,0 +1,17 @@
+{
+  "content.js": {
+    "mtime": 1784569384.817372,
+    "ast_hash": "c53ac80eadc9014a693248136cd63920",
+    "semantic_hash": "c53ac80eadc9014a693248136cd63920"
+  },
+  "manifest.json": {
+    "mtime": 1784569384.8223605,
+    "ast_hash": "da7bc365b62eb2f6cdff88f8cad9020e",
+    "semantic_hash": "da7bc365b62eb2f6cdff88f8cad9020e"
+  },
+  "popup.js": {
+    "mtime": 1784569384.8243544,
+    "ast_hash": "128662ae939505e00b60926ed23a587b",
+    "semantic_hash": "128662ae939505e00b60926ed23a587b"
+  }
+}
