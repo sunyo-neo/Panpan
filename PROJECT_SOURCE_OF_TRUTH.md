@@ -89,10 +89,6 @@ You are the **Gatekeeper of Scope**. Your primary job is to convert ambiguous sp
   - **Hybrid Mode**: Dual-axis navigation (Pages vs Panels) with Buffer State.
   - **Immersive Reading Mode**: Auto-hiding HUD and debounce logic.
   - **Dynamic Panel Scaling**: 3-mode zoom logic (Fill, Dynamic, Page Scale) with `Z` hotkey and ARIA segmented control.
-* **Currently In-Progress / Blocked**:
-  - **Feature**: Save Settings.
-  - **Status**: Blocked at Tier 3 Decision Gate.
-  - **Action Required**: The PM must decide if settings are saved via `chrome.storage.local` (this device only) or `chrome.storage.sync` (all devices) before writing the task list.
 
 ### Key Architecture Map
 - `manifest.json`: The extension brain. Controls permissions (e.g., `activeTab`, `scripting`) and injections.
