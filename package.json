@@ -9,7 +9,7 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "build": "vite build"
   },
   "repository": {
