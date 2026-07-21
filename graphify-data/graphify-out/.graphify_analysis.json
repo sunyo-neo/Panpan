@@ -1,0 +1,133 @@
+{
+  "communities": {
+    "0": [
+      "manifest",
+      "manifest_content_scripts",
+      "manifest_description",
+      "manifest_host_permissions",
+      "manifest_manifest_version",
+      "manifest_name",
+      "manifest_version",
+      "ref_https_kagane_to"
+    ],
+    "1": [
+      "content",
+      "content_applysettingsupdate",
+      "content_dynamicsort",
+      "content_extractpanelsfromimage",
+      "content_launchoverlay",
+      "content_runscanner",
+      "content_startprocessing"
+    ],
+    "2": [
+      "manifest_action",
+      "manifest_action_default_icon",
+      "manifest_action_default_popup",
+      "manifest_default_icon_128",
+      "manifest_default_icon_16",
+      "manifest_default_icon_48"
+    ],
+    "3": [
+      "manifest_browser_specific_settings",
+      "manifest_browser_specific_settings_gecko",
+      "manifest_gecko_id",
+      "manifest_gecko_strict_min_version"
+    ],
+    "4": [
+      "manifest_icons",
+      "manifest_icons_128",
+      "manifest_icons_16",
+      "manifest_icons_48"
+    ],
+    "5": [
+      "manifest_permissions",
+      "ref_activetab",
+      "ref_scripting",
+      "ref_storage"
+    ],
+    "6": [
+      "popup",
+      "popup_get",
+      "popup_set"
+    ]
+  },
+  "cohesion": {
+    "0": 0.25,
+    "1": 0.5238095238095238,
+    "2": 0.3333333333333333,
+    "3": 0.5,
+    "4": 0.5,
+    "5": 0.5,
+    "6": 0.6666666666666666
+  },
+  "gods": [
+    {
+      "id": "content_startprocessing",
+      "label": "startProcessing()",
+      "degree": 4
+    },
+    {
+      "id": "manifest_icons",
+      "label": "icons",
+      "degree": 4
+    },
+    {
+      "id": "manifest_action_default_icon",
+      "label": "default_icon",
+      "degree": 4
+    },
+    {
+      "id": "manifest_permissions",
+      "label": "permissions",
+      "degree": 4
+    },
+    {
+      "id": "content_dynamicsort",
+      "label": "dynamicSort()",
+      "degree": 3
+    },
+    {
+      "id": "content_extractpanelsfromimage",
+      "label": "extractPanelsFromImage()",
+      "degree": 3
+    },
+    {
+      "id": "manifest_action",
+      "label": "action",
+      "degree": 3
+    },
+    {
+      "id": "manifest_browser_specific_settings_gecko",
+      "label": "gecko",
+      "degree": 3
+    },
+    {
+      "id": "content_applysettingsupdate",
+      "label": "applySettingsUpdate()",
+      "degree": 2
+    },
+    {
+      "id": "content_runscanner",
+      "label": "runScanner()",
+      "degree": 2
+    }
+  ],
+  "surprises": [],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `action` connect `Community 2` to `Community 0`?",
+      "why": "High betweenness centrality (0.175) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `icons` connect `Community 4` to `Community 0`?",
+      "why": "High betweenness centrality (0.116) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `manifest_version`, `name`, `version` to the rest of the system?",
+      "why": "18 weakly-connected nodes found - possible documentation gaps or missing edges."
+    }
+  ]
+}
