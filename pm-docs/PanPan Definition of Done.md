@@ -10,6 +10,8 @@ A feature or bug fix is NOT complete and MUST NOT be merged to the main branch u
 
 *(To be performed by the AI QA/Code Reviewer Agent)*
 
+> * *![][image1]***Holistic Integration Standard:** The Code Reviewer is fully empowered to grade the system for **Correctness** and **Maintainability** (per its native SKILL.md). All cross-file API contracts, Chrome storage keys, and message payloads must perfectly match.
+> * *![][image1]***Build Integrity:** Configuration files (`manifest.json`, etc.) must accurately point to the newly generated `dist/` or `build/` outputs, ensuring no dead code in production.
 > * *![][image1]***No Console Errors:** The extension throws zero runtime errors or warnings in the browser console during initialization and execution.  
 > * ![][image1]**Memory & Performance:** Code does not introduce infinite loops, layout thrashing, or heavy repaints. DOM manipulations use hardware-accelerated CSS where possible.  
 > * ![][image1]**Security Policy Compliance:** Code strictly adheres to Manifest V3 standards. No unsafe inline scripts (eval(), inline onclick handlers in HTML).  
