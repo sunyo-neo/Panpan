@@ -1,0 +1,44 @@
+{
+  "name": "panpan",
+  "version": "1.0.0",
+  "os": ["darwin", "linux", "win32"],
+  "cpu": ["x64", "arm64"],
+  "description": "",
+  "main": "content.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "vitest run --passWithNoTests",
+    "build": "vite build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sunyo-neo/Panpan.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/sunyo-neo/Panpan/issues"
+  },
+  "homepage": "https://github.com/sunyo-neo/Panpan#readme",
+  "devDependencies": {
+    "@vitejs/plugin-react": "^6.0.3",
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "detect-libc": "^2.1.2",
+    "fdir": "^6.5.0",
+    "lightningcss": "^1.33.0",
+    "nanoid": "^3.3.16",
+    "picocolors": "^1.1.1",
+    "picomatch": "^4.0.5",
+    "postcss": "^8.5.21",
+    "rolldown": "^1.1.5",
+    "source-map-js": "^1.2.1",
+    "tinyglobby": "^0.2.17"
+  }
+}
