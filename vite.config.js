@@ -4,7 +4,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       input: {
-        content: 'src/main.js',
+        content: 'src/main.jsx',
         popup: 'popupui.html'
       },
       output: {
