@@ -3,10 +3,13 @@ import { dynamicSort } from './engine/dynamicSort.js';
 import { setPanels, setViewerSettings, setMangaImages, getState } from './state/viewerState.js';
 import { launchOverlay, renderCurrent } from './ui/overlay.js';
 import { bindKeys } from './ui/keybinds.js';
+import { initFAB } from './ui/fab.js';
 
 if (typeof window.panelZoomInjected === 'undefined') {
     window.panelZoomInjected = true;
     console.log("PanPan Content Script Injected Successfully! (Vite Bundled)");
+
+    initFAB(runScanner);
 
     chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         if (request.action === "START_VIEWER") {

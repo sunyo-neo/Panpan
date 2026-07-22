@@ -393,16 +393,44 @@
             box-shadow: 0 4px 14px 0 rgba(139, 92, 246, 0.4);
             animation: pulse-shadow 2s infinite;
         }
-        @keyframes pulse-shadow {
-            0% {
-                box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.6);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(139, 92, 246, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(139, 92, 246, 0);
-            }
+        }
+        
+        .power-btn {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #2f415c;
+            box-shadow: 
+              inset 0 4px 10px rgba(255, 255, 255, 0.1),
+              0 8px 20px rgba(0, 0, 0, 0.4);
+            margin: var(--space-4) auto;
+        }
+
+        .power-btn.power-off {
+            color: var(--color-error);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.2), inset 0 4px 10px rgba(255, 255, 255, 0.1);
+        }
+
+        .power-btn.power-on {
+            color: var(--color-success);
+            box-shadow: 0 0 40px rgba(34, 197, 94, 0.4), inset 0 4px 10px rgba(255, 255, 255, 0.1);
+        }
+
+        .power-icon {
+            width: 80px;
+            height: 80px;
+            fill: currentColor;
+            transition: fill 0.3s ease, transform 0.2s ease;
+        }
+
+        .power-btn:active .power-icon {
+            transform: scale(0.9);
         }
         
         textarea.dd-report {
@@ -497,7 +525,11 @@
                 <span class="menu-arrow">&gt;</span>
             </div>
 
-            <button id="start-btn" class="action-btn" disabled>Launch Panel View</button>
+            <button id="power-btn" class="power-btn power-off" aria-label="Toggle Extension">
+                <svg class="power-icon" viewBox="0 0 24 24">
+                    <path d="M16.56,5.44L15.11,6.89C16.84,7.94 18,9.83 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12C6,9.83 7.16,7.94 8.88,6.88L7.44,5.44C5.36,6.88 4,9.28 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12C20,9.28 18.64,6.88 16.56,5.44M11,3V13H13V3H11Z" />
+                </svg>
+            </button>
         </div>
 
         <!-- SETTINGS VIEW -->
