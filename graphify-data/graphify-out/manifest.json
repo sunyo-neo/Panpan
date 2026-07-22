@@ -1,0 +1,112 @@
+{
+  "content.js": {
+    "mtime": 1784569384.817372,
+    "ast_hash": "c53ac80eadc9014a693248136cd63920",
+    "semantic_hash": ""
+  },
+  "manifest.json": {
+    "mtime": 1784569384.8223605,
+    "ast_hash": "da7bc365b62eb2f6cdff88f8cad9020e",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1784645532.2419987,
+    "ast_hash": "e24fdb66a5bdd614349057f890550ee3",
+    "semantic_hash": ""
+  },
+  "popup.js": {
+    "mtime": 1784569384.8243544,
+    "ast_hash": "128662ae939505e00b60926ed23a587b",
+    "semantic_hash": ""
+  },
+  "src/engine/dynamicSort.js": {
+    "mtime": 1784645633.3812993,
+    "ast_hash": "20a714e86bef05055721ea9d6e29fbb9",
+    "semantic_hash": ""
+  },
+  "src/engine/floodFill.js": {
+    "mtime": 1784645628.8702996,
+    "ast_hash": "6be55908507c70e13eaa036108dedeef",
+    "semantic_hash": ""
+  },
+  "src/main.js": {
+    "mtime": 1784645723.5084777,
+    "ast_hash": "806885c31bc106f52408276f91fb8cf9",
+    "semantic_hash": ""
+  },
+  "src/state/viewerState.js": {
+    "mtime": 1784645687.4357073,
+    "ast_hash": "0a5a0fb76417913ba1fb08415cf41412",
+    "semantic_hash": ""
+  },
+  "src/ui/keybinds.js": {
+    "mtime": 1784645710.2726517,
+    "ast_hash": "68f14a7bb3db525c7f671297a08efdc7",
+    "semantic_hash": ""
+  },
+  "src/ui/overlay.js": {
+    "mtime": 1784645736.730358,
+    "ast_hash": "e7da0feee5b15764be20146a7cbf732d",
+    "semantic_hash": ""
+  },
+  "vite.config.js": {
+    "mtime": 1784645541.716259,
+    "ast_hash": "6c8fe8af90710056644a942492b48a1e",
+    "semantic_hash": ""
+  },
+  ".agents/AGENTS.md": {
+    "mtime": 1784642940.7685075,
+    "ast_hash": "4c42266c20386026c2671bb66acd5253",
+    "semantic_hash": ""
+  },
+  "PROJECT_SOURCE_OF_TRUTH.md": {
+    "mtime": 1784569384.8153718,
+    "ast_hash": "4030cc915168ac1997a46bdc00bf49e0",
+    "semantic_hash": ""
+  },
+  "docs/adr/001-adopt-vite-bundler.md": {
+    "mtime": 1784645496.402143,
+    "ast_hash": "99e6633ed6e59c86e11435ad04315674",
+    "semantic_hash": ""
+  },
+  "pm-docs/AI Team Prompts & Roles.md": {
+    "mtime": 1784647421.0994132,
+    "ast_hash": "195e8e3cc8d5dcadbe3cdae3a5c3bb2f",
+    "semantic_hash": ""
+  },
+  "pm-docs/PanPan Definition of Done.md": {
+    "mtime": 1784643879.6218896,
+    "ast_hash": "8fe25581e15c66f323d14a5177393776",
+    "semantic_hash": ""
+  },
+  "pm-docs/PanPan Intake Templates.md": {
+    "mtime": 1784643870.7233963,
+    "ast_hash": "a987a1d3099b7cd77f56765fdabc07ed",
+    "semantic_hash": ""
+  },
+  "pm-docs/PanPan SIPOC Matrix.md": {
+    "mtime": 1784643859.1351242,
+    "ast_hash": "1cde7abf987f1173038ca5dfe0064a48",
+    "semantic_hash": ""
+  },
+  "popupui.html": {
+    "mtime": 1784645744.4326274,
+    "ast_hash": "49c9664429380c4521b8e7435f28c090",
+    "semantic_hash": ""
+  },
+  "icons/icon128.png": {
+    "mtime": 1784569384.8183694,
+    "ast_hash": "316474d7d8ce3b61dd62883d2e4460a6",
+    "semantic_hash": ""
+  },
+  "icons/icon16.png": {
+    "mtime": 1784569384.819368,
+    "ast_hash": "5c19cf9a54c785727674ce64cb6a0b6d",
+    "semantic_hash": ""
+  },
+  "icons/icon48.png": {
+    "mtime": 1784569384.8203647,
+    "ast_hash": "c7cb04d9921b713d1c6a381387b293b2",
+    "semantic_hash": ""
+  }
+}

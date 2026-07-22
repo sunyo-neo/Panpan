@@ -1,0 +1,17 @@
+{
+  "0": "package.json",
+  "1": "dependencies",
+  "2": "main.js",
+  "3": "2. The Team (Personnel & Departments)",
+  "4": "manifest.json",
+  "5": "**CORE PRODUCTION TEAM**",
+  "6": "content.js",
+  "7": "**Value Stream: PanPan AI Development Lifecycle**",
+  "8": "default_icon",
+  "9": "ADR 001: Adopt Vite Bundler",
+  "10": "**🛑 Gate 2 Policy (Inspection & UAT)**",
+  "11": "**🛑 Gate 1 Policy (Intake & Triage)**",
+  "12": "Agent Rules for Panpan",
+  "13": "popup.js",
+  "14": "vite.config.js"
+}
