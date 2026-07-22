@@ -5,8 +5,8 @@
     "semantic_hash": ""
   },
   "manifest.json": {
-    "mtime": 1784569384.8223605,
-    "ast_hash": "da7bc365b62eb2f6cdff88f8cad9020e",
+    "mtime": 1784649295.1055212,
+    "ast_hash": "ce95f021b44e1860ff1beba846b0505f",
     "semantic_hash": ""
   },
   "package.json": {
@@ -30,13 +30,13 @@
     "semantic_hash": ""
   },
   "src/main.js": {
-    "mtime": 1784645723.5084777,
-    "ast_hash": "806885c31bc106f52408276f91fb8cf9",
+    "mtime": 1784649328.9899232,
+    "ast_hash": "a074eebcb582af1530a010ace215dd64",
     "semantic_hash": ""
   },
   "src/state/viewerState.js": {
-    "mtime": 1784645687.4357073,
-    "ast_hash": "0a5a0fb76417913ba1fb08415cf41412",
+    "mtime": 1784649308.4596164,
+    "ast_hash": "30077114c9aa0a068480a63a0222d442",
     "semantic_hash": ""
   },
   "src/ui/keybinds.js": {
@@ -70,13 +70,13 @@
     "semantic_hash": ""
   },
   "pm-docs/AI Team Prompts & Roles.md": {
-    "mtime": 1784647421.0994132,
-    "ast_hash": "195e8e3cc8d5dcadbe3cdae3a5c3bb2f",
+    "mtime": 1784650514.2046056,
+    "ast_hash": "8e4a85624783734a1f8bdc40ffd863f0",
     "semantic_hash": ""
   },
   "pm-docs/PanPan Definition of Done.md": {
-    "mtime": 1784643879.6218896,
-    "ast_hash": "8fe25581e15c66f323d14a5177393776",
+    "mtime": 1784650041.3091137,
+    "ast_hash": "0eaecc17be651620cf60473a784e6fe5",
     "semantic_hash": ""
   },
   "pm-docs/PanPan Intake Templates.md": {
@@ -107,6 +107,21 @@
   "icons/icon48.png": {
     "mtime": 1784569384.8203647,
     "ast_hash": "c7cb04d9921b713d1c6a381387b293b2",
+    "semantic_hash": ""
+  },
+  "docs/drift-audit/FINDING-settings-key-mismatch.md": {
+    "mtime": 1784648882.5176017,
+    "ast_hash": "e5e9dc9e9a74f84f872030ca203c2038",
+    "semantic_hash": ""
+  },
+  "docs/drift-audit/FINDING-vite-migration-unlinked.md": {
+    "mtime": 1784648874.044063,
+    "ast_hash": "fe9a1369a0107500531879d4e598e16f",
+    "semantic_hash": ""
+  },
+  "docs/drift-audit/REGISTRY.md": {
+    "mtime": 1784648899.4038322,
+    "ast_hash": "e5e4acc76b36c1eb48ba53e6052e34ad",
     "semantic_hash": ""
   }
 }

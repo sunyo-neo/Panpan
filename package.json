@@ -1,13 +1,15 @@
 {
   "name": "panpan",
   "version": "1.0.0",
+  "os": ["darwin", "linux", "win32"],
+  "cpu": ["x64", "arm64"],
   "description": "",
   "main": "content.js",
   "directories": {
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run --passWithNoTests",
     "build": "vite build"
   },
   "repository": {
@@ -24,13 +26,13 @@
   "homepage": "https://github.com/sunyo-neo/Panpan#readme",
   "devDependencies": {
     "@vitejs/plugin-react": "^6.0.3",
-    "vite": "^8.1.5"
+    "vite": "^8.1.5",
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "detect-libc": "^2.1.2",
     "fdir": "^6.5.0",
     "lightningcss": "^1.33.0",
-    "lightningcss-win32-x64-msvc": "^1.33.0",
     "nanoid": "^3.3.16",
     "picocolors": "^1.1.1",
     "picomatch": "^4.0.5",
